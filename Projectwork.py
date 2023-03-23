@@ -1,3 +1,4 @@
+
 import time
 import math
 import win32api
@@ -14,7 +15,7 @@ def Closest_enemy(list,body_multiplier,x,y):
     centers=[]
     distance=[]
     for i in list:
-        if i[5]==0 and i[4]>0.3:
+        if i[5]==0 and i[4]>0.8:
             width=i[2]-i[0]
             height=i[3]-i[1]
             center=(int(i[2]-width/2),int((i[3]-height*body_multiplier)))
@@ -23,8 +24,7 @@ def Closest_enemy(list,body_multiplier,x,y):
     if len(centers)==0:
         return
     return centers[distance.index(min(distance,default=None))]
-kernel32 = ctypes.windll.kernel32
-kernel32.SetThreadPriority(kernel32.GetCurrentThread(), 25)
+
 sqrt3 = np.sqrt(3)
 sqrt5 = np.sqrt(5)
 def wind_mouse(start_x, start_y, dest_x, dest_y,distance,t, G_0=20, W_0=5, M_0=3, D_0=15):
@@ -38,7 +38,9 @@ def wind_mouse(start_x, start_y, dest_x, dest_y,distance,t, G_0=20, W_0=5, M_0=3
     '''
     current_x,current_y = start_x,start_y
     v_x = v_y = W_x = W_y = 0
+    print("új")
     while (dist:=np.hypot(dest_x-start_x,dest_y-start_y)) >= distance:
+        print(dist)
         W_mag = min(W_0, dist)
         if dist >= D_0:
             W_x = W_x/sqrt3 + (2*np.random.random()-1)*W_mag/sqrt5
@@ -62,14 +64,22 @@ def wind_mouse(start_x, start_y, dest_x, dest_y,distance,t, G_0=20, W_0=5, M_0=3
         move_x = int(np.round(start_x))
         move_y = int(np.round(start_y))
         if current_x != move_x or current_y != move_y:
+            start=time.time()
             #This should wait for the mouse polling interval
-            timer = kernel32.CreateWaitableTimerA(ctypes.c_void_p(), True, ctypes.c_void_p())
-            delay = ctypes.c_longlong(t)
-            kernel32.SetWaitableTimer(timer, ctypes.byref(delay), 0, ctypes.c_void_p(), ctypes.c_void_p(), False)
-            kernel32.WaitForSingleObject(timer, 0xffffffff)
+            #time.sleep(0.01)
+            for i in range(t):
+                pass
+            #print(int(v_x),int(v_y))
+            #print(time.time()-start)
             win32api.mouse_event(0x0001,int(v_x),int(v_y))
-            
+    print(dist,"vége")
 
+            
+def mouse(rl,act_distance,body_multiplier,x,y,mouse_speed):
+    if len(rl)>0:
+        dest=Closest_enemy(rl,body_multiplier,x,y)
+        if dest!=None and np.hypot(dest[0]-x/2,dest[1]-y/2) < act_distance:
+            wind_mouse(x/2,y/2,dest[0],dest[1],distance=2,t=12000,M_0=int(12*mouse_speed))
 
 def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
     if (torch.cuda.is_available()):
@@ -91,15 +101,18 @@ def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
         #img=np.array(camera.grab(region=region))
         result=model(img)
         rl=result.xyxy[0].tolist()
-        #print("felismerés ideje: {}".format(time.time() - last_time))
-        if len(rl)>0:
-            dest=Closest_enemy(rl,body_multiplier,x,y)
-            if dest!=None and np.hypot(dest[0]-x/2,dest[1]-y/2):
-                wind_mouse(x/2,y/2,dest[0],dest[1],distance=3,t=1,M_0=int(24*mouse_speed))
-        #cv2.imshow('debug',np.squeeze(result.render())) 
-        
-        cv2.waitKey(-1)
-        print("fps:",(1 / (time.time() - last_time)))
-    camera.stop()  
+        #print("felismerés ideje: {}".format(1/(time.time() - last_time)))
+        #t1=Thread(target=mouse,args=(rl,act_distance,body_multiplier,x,y,mouse_speed))
+        """ if(t1.is_alive()):
+            t1.join()
+        else:
+            t1.start() """
+        mouse(rl,act_distance,body_multiplier,x,y,mouse_speed)
+    
+    #cv2.imshow('debug',np.squeeze(result.render())) 
+    
+    cv2.waitKey(-1)
+    print("fps:",(1 / (time.time() - last_time)))
+    #camera.stop()  
 
-Aimbot("Counter Strike: Global Offensive",500,1,640,300,0.85)
+Aimbot("Counter Strike: Global Offensive",1850,1,1850,500,0.81)
