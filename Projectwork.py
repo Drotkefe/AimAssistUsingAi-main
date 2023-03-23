@@ -109,10 +109,10 @@ def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
             t1.start() """
         mouse(rl,act_distance,body_multiplier,x,y,mouse_speed)
     
-    #cv2.imshow('debug',np.squeeze(result.render())) 
-    
-    cv2.waitKey(-1)
-    print("fps:",(1 / (time.time() - last_time)))
+        #cv2.imshow('debug',np.squeeze(result.render())) 
+        
+        cv2.waitKey(-1)
+        print("fps:",(1 / (time.time() - last_time)))
     #camera.stop()  
 
 Aimbot("Counter Strike: Global Offensive",1850,1,1850,500,0.81)
