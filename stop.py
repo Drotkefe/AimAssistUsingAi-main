@@ -72,14 +72,14 @@ while running:
                 path.append((init_posx,init_posy))
             else:
                 szamol=False
-                print(len(path),end=' ')
+                #print(len(path),end=' ')
                 if (lesser_than_1000(path)):
                     s1=path[0][0]
                     s2=path[0][1]
                     rows=[s1,s2,posx,posy,make_it_numbers(make_it_1000_padding(trim(path)))]
                     writer.writerow(rows)
                
-    screen.fill((190, 112, 37))
+    screen.fill((255, 255, 255))
 
     pygame.draw.circle(screen, (0, 0, 255), (posx, posy), 5)
     if szamol:
