@@ -1,10 +1,14 @@
 import pygame
 import random
+import win32con
 import pyautogui
 import csv
 import math
 import time
 import pandas as pd
+import win32api
+from pynput.mouse import Controller
+
 pygame.init()
 
 def get_distance(x,y):
@@ -20,13 +24,11 @@ writer = csv.writer(f)
 
 
 def get_mouse_data():
-    before=pyautogui.position()
+    before=win32api.GetCursorPos()
+    path.append(before)
     for i in range(20000):
         pass
-    after=pyautogui.position()
-    path.append((after[0]-before[0],after[1]-before[1]))
-
-
+    
 def trim(t):
     m=0
     t.pop(0)
@@ -70,16 +72,25 @@ while running:
                 posy=random.randint(5,1075)
                 path=[]
                 path.append((init_posx,init_posy))
+                path_rel=[]
             else:
                 szamol=False
-                print(len(path),end=' ')
+                #print(len(path),end=' ')
+                for i in range(1,len(path)-1):
+                    if(i==1):
+                        path_rel.append((0,0))
+                    else:
+                        path_rel.append((path[i][0]-path[i-1][0],path[i][1]-path[i-1][1]))
                 if (lesser_than_1000(path)):
                     s1=path[0][0]
                     s2=path[0][1]
-                    rows=[s1,s2,posx,posy,make_it_numbers(make_it_1000_padding(trim(path)))]
+                    rows=[s1,s2,posx,posy,make_it_numbers(make_it_1000_padding(trim(path_rel)))]
                     writer.writerow(rows)
+                print(len(path))
+                
+                
                
-    screen.fill((190, 112, 37))
+    screen.fill((255, 255, 255))
 
     pygame.draw.circle(screen, (0, 0, 255), (posx, posy), 5)
     if szamol:
@@ -92,5 +103,26 @@ while running:
 
 pygame.quit()
 f.close()
+
+
+""" time.sleep(2)
+win32api.SetCursorPos((200,200))
+time.sleep(1)
+mouse = Controller()
+path_rel=[]
+for i in range(1,len(path)-1):
+    if(i==1):
+        path_rel.append((0,0))
+    else:
+        path_rel.append((path[i][0]-path[i-1][0],path[i][1]-path[i-1][1]))
+
+print(path_rel)
+
+for i in range(1,len(path_rel)-1):
+    mouse.move(path_rel[i][0],path_rel[i][1])
+    for i in range(20000):
+        pass
+print(win32api.GetCursorPos()) """
+
 
 
