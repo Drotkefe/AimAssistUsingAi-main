@@ -1,4 +1,3 @@
-
 import time
 import math
 import win32api
@@ -9,8 +8,10 @@ import torch
 import dxcam
 from threading import Thread
 import ctypes
+from pynput.mouse import Controller
 
 
+eger=Controller()
 def Closest_enemy(list,body_multiplier,x,y):
     centers=[]
     distance=[]
@@ -38,7 +39,6 @@ def wind_mouse(start_x, start_y, dest_x, dest_y,distance,t, G_0=20, W_0=5, M_0=3
     '''
     current_x,current_y = start_x,start_y
     v_x = v_y = W_x = W_y = 0
-    print("új")
     while (dist:=np.hypot(dest_x-start_x,dest_y-start_y)) >= distance:
         print(dist)
         W_mag = min(W_0, dist)
@@ -72,7 +72,7 @@ def wind_mouse(start_x, start_y, dest_x, dest_y,distance,t, G_0=20, W_0=5, M_0=3
             #print(int(v_x),int(v_y))
             #print(time.time()-start)
             win32api.mouse_event(0x0001,int(v_x),int(v_y))
-    print(dist,"vége")
+            #eger.move(int(v_x),int(v_y))
 
             
 def mouse(rl,act_distance,body_multiplier,x,y,mouse_speed):
@@ -115,4 +115,4 @@ def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
         print("fps:",(1 / (time.time() - last_time)))
     #camera.stop()  
 
-Aimbot("Counter Strike: Global Offensive",1850,1,1850,500,0.81)
+Aimbot("Counter Strike: Global Offensive",1850,1,350,400,0.81)

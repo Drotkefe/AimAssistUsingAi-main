@@ -26,8 +26,7 @@ writer = csv.writer(f)
 def get_mouse_data():
     before=win32api.GetCursorPos()
     path.append(before)
-    for i in range(20000):
-        pass
+    
     
 def trim(t):
     m=0
@@ -60,6 +59,7 @@ running = True
 path=[]
 posx,posy=random.randint(5,1915),random.randint(5,1075)
 while running:
+    s=time.time()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -99,7 +99,7 @@ while running:
             get_mouse_data()
         
     pygame.display.flip()
-    
+    #print(time.time()-s)
 
 pygame.quit()
 f.close()
@@ -123,6 +123,7 @@ for i in range(1,len(path_rel)-1):
     for i in range(20000):
         pass
 print(win32api.GetCursorPos()) """
+
 
 
 
