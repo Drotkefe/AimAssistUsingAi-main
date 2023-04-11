@@ -87,6 +87,5 @@ def train(model, dataset, optimizer, loss_function, epochs=100, visualize=False,
     plt.ylabel('Loss')
     plt.show()
 
-train(path_network,dataset,path_opt,loss_function,100)
-
+train(path_network,dataset,path_opt,loss_function,10)
 torch.save(path_network.state_dict(), "./models/path_network_state")

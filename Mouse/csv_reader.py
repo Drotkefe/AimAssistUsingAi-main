@@ -75,8 +75,9 @@ def Create_Dataset(data):
 
 array=make_array_from_data(data)
 data=create_data(array)
-#plot_path(data[len(data)-1])
-dataset=Create_Dataset(final_array(data))
+for i in range(10):
+    plot_path(data[len(data)-1-i])
+#dataset=Create_Dataset(final_array(data))
 print("Eltelt idő: {} mp az adatok beolvasásával".format(round(time.time()-s,2)))
 
 
