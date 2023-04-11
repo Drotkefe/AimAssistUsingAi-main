@@ -2,6 +2,9 @@ import pandas as pd
 import time
 from ast import literal_eval
 import matplotlib.pyplot as plt
+import copy
+import numpy as np
+import torch
 
 s=time.time()
 data=pd.read_csv('trajectory_file.csv')
@@ -37,15 +40,44 @@ def plot_path(path):
     plt.plot(x,y)
     plt.show()
 
+def add_tuple_to_array(array):
+    tuppled=[]
+    for i in range(0,len(array)-1,2):
+        cord=(array[i],array[i+1])
+        tuppled.append(cord)
+    return tuppled
+
+def final_array(array):
+    final=[]
+    for line in array:
+        final.append(add_tuple_to_array(line))
+    return final
+
+def Create_Dataset(data):
+    dataset=[]
+    for path in data:
+        c_path=path.copy()
+        end=[c_path[0][0],c_path[0][1]]
+        c_path.remove(c_path[0])
+        inputs = np.zeros([len(c_path), 2])
+        inputs[0] = [end[0], end[1]]
+        for i in range(len(c_path)-1):
+            end[0] = end[0] - c_path[i][0]
+            end[1] = end[1] - c_path[i][1]
+            inputs[i+1] = [end[0],end[1]]
+        labels = np.zeros([len(c_path), 2])
+        for i in range(len(c_path)):
+            labels[i] = [c_path[i][0],c_path[i][1]]
+        inputs = torch.from_numpy(inputs).float()
+        labels = torch.from_numpy(labels).float()
+        dataset.append((inputs, labels))
+    return dataset
+
 array=make_array_from_data(data)
-print(time.time()-s)
 data=create_data(array)
-for i in range(50):
-    plot_path(data[len(data)-i-1])
-
-
-#kölünbség 416 -213
-
+#plot_path(data[len(data)-1])
+dataset=Create_Dataset(final_array(data))
+print("Eltelt idő: {} mp az adatok beolvasásával".format(round(time.time()-s,2)))
 
 
 
@@ -59,20 +91,3 @@ for i in range(50):
 
 
 
-
-""" points=array[-1]
-i=2
-#pyautogui.moveTo(array[-1][0],array[-1][1])
-mouse=Controller()
-print(array[-1][4])
-print(len(array[-1][4]))
-while i<len(array[-1][4]):
-    x=array[-1][4][i]
-    y=array[-1][4][i+1]
-    mouse.move(x,y)
-    for x in range(80000):
-        pass
-    i+=2
-print(pyautogui.position())
-
-print(array[-1][2],array[-1][3] ," kéne") """
