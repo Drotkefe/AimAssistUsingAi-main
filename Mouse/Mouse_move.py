@@ -22,10 +22,11 @@ class PathNet(nn.Module):
                     )
     def forward(self, x):
         return self.fc(x)
+    
 
 path=PathNet()
 path.to(device)
-path.load_state_dict(torch.load("./models/path_network_state"))
+path.load_state_dict(torch.load("./models/path_network_state_x"))
 
 def generate_path(path_model, s, t, time_model=None,):
     pred_path = []
@@ -37,7 +38,7 @@ def generate_path(path_model, s, t, time_model=None,):
     delta_loc = wanted_loc-curr_loc
     dist = np.sqrt(delta_loc[0]**2+delta_loc[1]**2)
     # Looping new movement in the path while we have a distance from the target point
-    while dist > 3:
+    while dist > 0:
         prev_dist = dist
         with torch.no_grad():
             inp = torch.from_numpy(delta_loc).float().to(device)
@@ -68,18 +69,19 @@ def plot_path(path):
     x_sum=0
     y_sum=0
     for i in range(len(path)-2):
-        x_sum+=path[i][0]
-        y_sum+=path[i][1]
         x.append(x_sum)
         y.append(y_sum)
+        x_sum+=path[i][0]
+        y_sum+=path[i][1]
 
     plt.plot(x,y)
+    plt.xlim(0, 1920)
+    plt.ylim(0, 1080)
+    plt.gca().invert_yaxis()
     plt.show()
 
 s1=time.time()
-eger=generate_path(path,(100,100),(200,200))
+eger=generate_path(path,(0,0),(100,100))
 print("idő:",time.time()-s1)
+print(len(eger))
 plot_path(eger)
-
-##To DO
-##Reszeljük meg az inputokat hátulról aztán train

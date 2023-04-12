@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import copy
 import numpy as np
 import torch
+import more
 
 s=time.time()
 data=pd.read_csv('trajectory_file.csv')
@@ -73,11 +74,23 @@ def Create_Dataset(data):
         dataset.append((inputs, labels))
     return dataset
 
+def trim_zeros_from_back(x):
+    for path in x:
+        i=len(path)-1
+        while i>=0 and (path[i][0]==0 and path[i][1]==0):
+            del path[i]
+            i-=1
+    return x
+
 array=make_array_from_data(data)
 data=create_data(array)
-for i in range(10):
-    plot_path(data[len(data)-1-i])
-#dataset=Create_Dataset(final_array(data))
+
+#for i in range(1,10):
+#   plot_path(data[-i])
+#print(trim_zeros_from_back(final_array(data))[-1])
+dataset=Create_Dataset(trim_zeros_from_back(final_array(data)))
+dataset.extend(more.path_dataset)
+#print(len(dataset))
 print("Eltelt idő: {} mp az adatok beolvasásával".format(round(time.time()-s,2)))
 
 
