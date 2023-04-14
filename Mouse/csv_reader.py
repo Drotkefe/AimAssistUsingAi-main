@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import copy
 import numpy as np
 import torch
-import more
+import more_data
 
 s=time.time()
 data=pd.read_csv('trajectory_file.csv')
@@ -33,12 +33,15 @@ def plot_path(path):
     x_sum=0
     y_sum=0
     for i in range(2,len(path)-1,2):
-        x_sum+=path[i]
-        y_sum+=path[i+1]
         x.append(x_sum)
         y.append(y_sum)
-
+        x_sum+=path[i]
+        y_sum+=path[i+1]
+        
     plt.plot(x,y)
+    plt.xlim(-1920, 1920)
+    plt.ylim(-1080, 1080)
+    plt.gca().invert_yaxis()
     plt.show()
 
 def add_tuple_to_array(array):
@@ -86,10 +89,10 @@ array=make_array_from_data(data)
 data=create_data(array)
 
 #for i in range(1,10):
-#   plot_path(data[-i])
+   #plot_path(data[-i])
 #print(trim_zeros_from_back(final_array(data))[-1])
 dataset=Create_Dataset(trim_zeros_from_back(final_array(data)))
-dataset.extend(more.path_dataset)
+dataset.extend(more_data.path_dataset)
 #print(len(dataset))
 print("Eltelt idő: {} mp az adatok beolvasásával".format(round(time.time()-s,2)))
 

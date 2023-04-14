@@ -18,11 +18,12 @@ class PathNet(nn.Module):
                         nn.LeakyReLU(),
                         nn.Linear(1000, 200),
                         nn.LeakyReLU(),
-                        nn.Linear(200, 2)
+                        nn.Linear(200, 2)    
                     )
     def forward(self, x):
         return self.fc(x)
-    
+
+
 
 path=PathNet()
 path.to(device)
@@ -81,7 +82,7 @@ def plot_path(path):
     plt.show()
 
 s1=time.time()
-eger=generate_path(path,(0,0),(100,100))
+eger=generate_path(path,(0,0),(859,317))
 print("idő:",time.time()-s1)
 print(len(eger))
 plot_path(eger)
