@@ -1,4 +1,5 @@
 import time
+from time import perf_counter
 import math
 import win32api
 import cv2
@@ -81,6 +82,8 @@ def mouse(rl,act_distance,body_multiplier,x,y,mouse_speed):
         if dest!=None and np.hypot(dest[0]-x/2,dest[1]-y/2) < act_distance:
             wind_mouse(x/2,y/2,dest[0],dest[1],distance=2,t=12000,M_0=int(12*mouse_speed))
 
+
+fps=np.zeros(500)
 def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
     if (torch.cuda.is_available()):
         print(torch.cuda.get_device_name(0))
@@ -92,27 +95,32 @@ def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
     x_plus=int((1920-x)/2)
     y_plus=int((1080-y)/2)
     region=(x_plus,y_plus,x_plus+x,y_plus+y)
-    #camera=dxcam.create(region=region,output_color="BGRA")
+    camera=dxcam.create(region=region,output_color="BGRA")
     with mss.mss() as sct:
         monitor = {"top": y_plus, "left": x_plus, "width": x, "height": y}
-    while True:
-        last_time=time.time()
-        img=np.array(sct.grab(monitor))
-        #img=np.array(camera.grab(region=region))
-        result=model(img)
-        rl=result.xyxy[0].tolist()
+    i=0
+    while True and i<500:
+        last_time=perf_counter()
+        #img=np.array(sct.grab(monitor))
+        img=np.array(camera.grab(region=region)) #dxcamban dxcam duplicator.py és 0-at 100ra
+        #last_time=perf_counter()
+        #result=model(img)
+        #last_time=perf_counter()
+        #rl=result.xyxy[0].tolist()
         #print("felismerés ideje: {}".format(1/(time.time() - last_time)))
         #t1=Thread(target=mouse,args=(rl,act_distance,body_multiplier,x,y,mouse_speed))
         """ if(t1.is_alive()):
             t1.join()
         else:
             t1.start() """
-        mouse(rl,act_distance,body_multiplier,x,y,mouse_speed)
+        #mouse(rl,act_distance,body_multiplier,x,y,mouse_speed)
     
         #cv2.imshow('debug',np.squeeze(result.render())) 
-        
-        cv2.waitKey(-1)
-        print("fps:",(1 / (time.time() - last_time)))
-    #camera.stop()  
+        cv2.waitKey(0)
+        print("fps:",1 / (perf_counter() - last_time),end='\r')
+        fps[i]=1 / (perf_counter() - last_time)
+        i+=1
+    camera.stop()  
 
-Aimbot("Counter Strike: Global Offensive",1850,1,350,400,0.81)
+Aimbot("Counter Strike: Global Offensive",1850,1,1920,1080,0.81)
+print(np.average(fps))
