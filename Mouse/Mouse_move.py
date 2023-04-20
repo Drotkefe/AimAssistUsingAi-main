@@ -82,7 +82,7 @@ def plot_path(path):
     plt.show()
 
 s1=time.time()
-eger=generate_path(path,(0,0),(859,317))
+eger=generate_path(path,(0,0),(100,100))
 print("idő:",time.time()-s1)
 print(len(eger))
 plot_path(eger)

@@ -20,9 +20,7 @@ class PathNet(nn.Module):
         self.fc = nn.Sequential(
                         nn.Linear(2, 1000),
                         nn.LeakyReLU(),
-                        nn.Linear(1000, 500),
-                        nn.LeakyReLU(),
-                        nn.Linear(500, 200),
+                        nn.Linear(1000, 200),
                         nn.LeakyReLU(),
                         nn.Linear(200, 2)
                     )
@@ -83,5 +81,5 @@ def train(model, dataset, optimizer, loss_function, epochs=100):
     plt.ylabel('Loss')
     plt.show()
 
-train(path_network,dataset,path_opt,loss_function,10)
-torch.save(path_network.state_dict(), "./models/path_network_state_big")
+train(path_network,dataset,path_opt,loss_function,50)
+torch.save(path_network.state_dict(), "./models/path_network_large_data")

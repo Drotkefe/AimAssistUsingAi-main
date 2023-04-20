@@ -40,8 +40,8 @@ def wind_mouse(start_x, start_y, dest_x, dest_y,distance,t, G_0=20, W_0=5, M_0=3
     '''
     current_x,current_y = start_x,start_y
     v_x = v_y = W_x = W_y = 0
-    while (dist:=np.hypot(dest_x-start_x,dest_y-start_y)) >= distance:
-        print(dist)
+    step=0
+    while (dist:=np.hypot(dest_x-start_x,dest_y-start_y)) >= distance and step < 5:
         W_mag = min(W_0, dist)
         if dist >= D_0:
             W_x = W_x/sqrt3 + (2*np.random.random()-1)*W_mag/sqrt5
@@ -74,14 +74,20 @@ def wind_mouse(start_x, start_y, dest_x, dest_y,distance,t, G_0=20, W_0=5, M_0=3
             #print(time.time()-start)
             win32api.mouse_event(0x0001,int(v_x),int(v_y))
             #eger.move(int(v_x),int(v_y))
+            step+=1
+        step+=1
 
             
 def mouse(rl,act_distance,body_multiplier,x,y,mouse_speed):
     if len(rl)>0:
         dest=Closest_enemy(rl,body_multiplier,x,y)
         if dest!=None and np.hypot(dest[0]-x/2,dest[1]-y/2) < act_distance:
-            wind_mouse(x/2,y/2,dest[0],dest[1],distance=2,t=12000,M_0=int(12*mouse_speed))
+            t1=create_thread(x/2,y/2,dest[0],dest[1],distance=2,t=0,G_0=20,W_0=5,M_0=12,D_0=15)
+            t1.start()
+            #wind_mouse(x/2,y/2,dest[0],dest[1],distance=2,t=10000,M_0=int(12*mouse_speed))
 
+def create_thread(start_x, start_y, dest_x, dest_y,distance,t,G_0=20, W_0=5, M_0=3, D_0=15):
+    return Thread(target=wind_mouse,args=(start_x,start_y,dest_x,dest_y,distance,t,G_0, W_0, M_0, D_0))
 
 fps=np.zeros(500)
 def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
@@ -91,7 +97,7 @@ def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
         game="CS_GO_Modell.pt"
     else:
         game="Valorant.pt"
-    model=torch.hub.load('ultralytics/yolov5','custom',path=game)
+    model=torch.hub.load('ultralytics/yolov5','custom',path=game).half()
     x_plus=int((1920-x)/2)
     y_plus=int((1080-y)/2)
     region=(x_plus,y_plus,x_plus+x,y_plus+y)
@@ -101,26 +107,22 @@ def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
     i=0
     while True and i<500:
         last_time=perf_counter()
-        #img=np.array(sct.grab(monitor))
-        img=np.array(camera.grab(region=region)) #dxcamban dxcam duplicator.py és 0-at 100ra
+        img=np.array(sct.grab(monitor))
+        #img=np.array(camera.grab(region=region)) #dxcamban dxcam duplicator.py és 0-at 100ra
         #last_time=perf_counter()
-        #result=model(img)
+        result=model(img,size=320)
         #last_time=perf_counter()
-        #rl=result.xyxy[0].tolist()
+        rl=result.xyxy[0].tolist()
         #print("felismerés ideje: {}".format(1/(time.time() - last_time)))
         #t1=Thread(target=mouse,args=(rl,act_distance,body_multiplier,x,y,mouse_speed))
-        """ if(t1.is_alive()):
-            t1.join()
-        else:
-            t1.start() """
+        #last_time=perf_counter()
         #mouse(rl,act_distance,body_multiplier,x,y,mouse_speed)
-    
         #cv2.imshow('debug',np.squeeze(result.render())) 
         cv2.waitKey(0)
-        print("fps:",1 / (perf_counter() - last_time),end='\r')
+        print("fps:",1/(perf_counter() - last_time),end='\r')
         fps[i]=1 / (perf_counter() - last_time)
         i+=1
     camera.stop()  
 
-Aimbot("Counter Strike: Global Offensive",1850,1,1920,1080,0.81)
+Aimbot("Counter Strike: Global Offensive",1850,5,255,255,0.81)
 print(np.average(fps))

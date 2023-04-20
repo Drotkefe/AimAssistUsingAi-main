@@ -85,15 +85,22 @@ def trim_zeros_from_back(x):
             i-=1
     return x
 
+
+
+def remove_zeros_completly(x):
+    for path in x:
+        i=len(path)-1
+        while i>=0 and (path[i][0]==0 and path[i][1]==0):
+            path.remove(path[i])
+            i-=1
+    return x
 array=make_array_from_data(data)
 data=create_data(array)
 
 #for i in range(1,10):
    #plot_path(data[-i])
-#print(trim_zeros_from_back(final_array(data))[-1])
-dataset=Create_Dataset(trim_zeros_from_back(final_array(data)))
+dataset=Create_Dataset(remove_zeros_completly(final_array(data)))
 dataset.extend(more_data.path_dataset)
-#print(len(dataset))
 print("Eltelt idő: {} mp az adatok beolvasásával".format(round(time.time()-s,2)))
 
 
