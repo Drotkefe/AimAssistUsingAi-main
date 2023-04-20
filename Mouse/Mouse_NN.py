@@ -33,7 +33,7 @@ loss_function = nn.MSELoss()
 path_network = PathNet()
 path_network.to(device)
 
-path_opt = optim.Adam(path_network.parameters(), lr=0.0001)
+path_opt = optim.Adam(path_network.parameters(), lr=0.00001)
 
 
 def train(model, dataset, optimizer, loss_function, epochs=100):
@@ -81,5 +81,5 @@ def train(model, dataset, optimizer, loss_function, epochs=100):
     plt.ylabel('Loss')
     plt.show()
 
-train(path_network,dataset,path_opt,loss_function,50)
+train(path_network,dataset,path_opt,loss_function,100)
 torch.save(path_network.state_dict(), "./models/path_network_large_data")
