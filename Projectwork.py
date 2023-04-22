@@ -62,7 +62,6 @@ def wind_mouse(start_x, start_y, dest_x, dest_y,distance,t, G_0=20, W_0=5, M_0=3
         move_x = int(np.round(start_x))
         move_y = int(np.round(start_y))
         if current_x != move_x or current_y != move_y:
-            start=time.time()
             #This should wait for the mouse polling interval
             #time.sleep(0.01)
             for i in range(t):
@@ -81,10 +80,24 @@ def mouse(rl,act_distance,body_multiplier,x,y,mouse_speed):
         if dest!=None and np.hypot(dest[0]-x/2,dest[1]-y/2) < act_distance:
             """ t1=create_thread(x/2,y/2,dest[0],dest[1],distance=2,t=0,G_0=20,W_0=5,M_0=12,D_0=15)
             t1.start() """
-            wind_mouse(x/2,y/2,dest[0],dest[1],distance=2,t=0,M_0=int(2*mouse_speed))
+            wind_mouse(x/2,y/2,dest[0],dest[1],distance=5,t=0,M_0=int(1*mouse_speed))
 
 def create_thread(start_x, start_y, dest_x, dest_y,distance,t,G_0=20, W_0=5, M_0=12, D_0=15):
     return Thread(target=wind_mouse,args=(start_x,start_y,dest_x,dest_y,distance,t,G_0, W_0, M_0, D_0))
+
+x_plus=int((1920-320)/2)
+y_plus=int((1080-320)/2)
+
+monitor = {"top": y_plus, "left": x_plus, "width": 320, "height": 320}
+sct = mss.mss()
+
+
+img=np.array(sct.grab(monitor))
+def Camera_Thread():
+    global img
+    while True:
+        img=np.array(sct.grab(monitor))
+
 
 fps=np.zeros(500)
 def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
@@ -95,17 +108,15 @@ def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
     else:
         game="Valorant.pt"
     model=torch.hub.load('ultralytics/yolov5','custom',path=game)
-    x_plus=int((1920-x)/2)
-    y_plus=int((1080-y)/2)
     region=(x_plus,y_plus,x_plus+x,y_plus+y)
     camera=dxcam.create(region=region,output_color="BGRA")
-    with mss.mss() as sct:
-        monitor = {"top": y_plus, "left": x_plus, "width": x, "height": y}
+
+    t1=Thread(target=Camera_Thread)
+    t1.start()
     i=0
     while True and i<500:
         last_time=perf_counter()
-        #img=np.array(sct.grab(monitor))
-        img=np.array(camera.grab(region=region)) #dxcamban dxcam duplicator.py és 0-at 100ra
+        #img=np.array(camera.grab(region=region)) #dxcamban dxcam duplicator.py és 0-at 100ra
         #last_time=perf_counter()
         result=model(img,size=320)
         rl=result.xyxy[0].tolist()
@@ -119,5 +130,5 @@ def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
         i+=1
     camera.stop()  
 
-Aimbot("Counter Strike: Global Offensive",1850,5,320,320,0.81)
+Aimbot("Counter Strike: Global Offensive",1850,5,320,320,0.82)
 print(np.average(fps))
