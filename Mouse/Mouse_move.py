@@ -27,9 +27,9 @@ class PathNet(nn.Module):
 
 path=PathNet()
 path.to(device)
-path.load_state_dict(torch.load("./models/path_network_large_data"))
+path.load_state_dict(torch.load("./models/path_network_large_data_x"))
 
-def generate_path(path_model, s, t, time_model=None,):
+def generate_path(path_model, s, t):
     pred_path = []
     wanted_loc = np.array([t[0], t[1]])
     curr_loc = np.array([s[0], s[1]])
@@ -76,13 +76,13 @@ def plot_path(path):
         y_sum+=path[i][1]
 
     plt.plot(x,y)
-    plt.xlim(0, 1920)
-    plt.ylim(0, 1080)
+    plt.title("Go To:  "+str(path[-1][0])+","+str(path[-1][1]))
+    plt.xlim(-1920, 1920)
+    plt.ylim(-1080, 1080)
     plt.gca().invert_yaxis()
     plt.show()
 
 s1=time.time()
-eger=generate_path(path,(0,0),(841,352))
+eger=generate_path(path,(0,0),(863,227))
 print("idő:",time.time()-s1)
-print(len(eger))
 plot_path(eger)

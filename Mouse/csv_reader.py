@@ -6,8 +6,9 @@ import copy
 import numpy as np
 import torch
 import more_data
+from sklearn.utils import shuffle
 
-s=time.time()
+
 data=pd.read_csv('trajectory_file.csv')
 def make_array_from_data(data):
     array=data.values
@@ -39,6 +40,7 @@ def plot_path(path):
         y_sum+=path[i+1]
         
     plt.plot(x,y)
+    plt.title("Go To:  "+str(path[0])+","+str(path[1]))
     plt.xlim(-1920, 1920)
     plt.ylim(-1080, 1080)
     plt.gca().invert_yaxis()
@@ -94,13 +96,15 @@ def remove_zeros_completly(x):
             path.remove(path[i])
             i-=1
     return x
+s=time.time()
 array=make_array_from_data(data)
 data=create_data(array)
 
-#for i in range(1,10):
-   #plot_path(data[-i])
+for i in range(1,10):
+   plot_path(data[-i])
 dataset=Create_Dataset(remove_zeros_completly(final_array(data)))
 dataset.extend(more_data.path_dataset)
+dataset=shuffle(dataset)
 print("Eltelt idő: {} mp az adatok beolvasásával".format(round(time.time()-s,2)))
 
 

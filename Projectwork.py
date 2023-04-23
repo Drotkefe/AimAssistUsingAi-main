@@ -14,7 +14,7 @@ def Closest_enemy(list,body_multiplier,x,y):
     centers=[]
     distance=[]
     for i in list:
-        if i[5]==0 and i[4]>0.8:
+        if i[5]==0 and i[4]>0.77:
             width=i[2]-i[0]
             height=i[3]-i[1]
             center=(int(i[2]-width/2),int((i[3]-height*body_multiplier)))
@@ -117,18 +117,18 @@ def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
     while True and i<500:
         last_time=perf_counter()
         #img=np.array(camera.grab(region=region)) #dxcamban dxcam duplicator.py és 0-at 100ra
-        #last_time=perf_counter()
+        last_time=perf_counter()
         result=model(img,size=320)
         rl=result.xyxy[0].tolist()
+        #print("fps:",1/(perf_counter() - last_time),end='\r')
         #t1=Thread(target=mouse,args=(rl,act_distance,body_multiplier,x,y,mouse_speed))
         #last_time=perf_counter()
         mouse(rl,act_distance,body_multiplier,x,y,mouse_speed)
         #cv2.imshow('debug',np.squeeze(result.render())) 
         cv2.waitKey(0)
         print("fps:",1/(perf_counter() - last_time),end='\r')
-        fps[i]=1 / (perf_counter() - last_time)
-        i+=1
-    camera.stop()  
+        #fps[i]=1 / (perf_counter() - last_time)
+        #i+=1 
 
 Aimbot("Counter Strike: Global Offensive",1850,5,320,320,0.82)
 print(np.average(fps))
