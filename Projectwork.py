@@ -1,4 +1,3 @@
-import time
 from time import perf_counter
 import math
 import win32api
@@ -6,23 +5,20 @@ import cv2
 import mss
 import numpy as np
 import torch
-import dxcam
 from threading import Thread
 
 
 def Closest_enemy(list,body_multiplier,x,y):
-    centers=[]
     distance=[]
     for i in list:
         if i[5]==0 and i[4]>0.77:
             width=i[2]-i[0]
             height=i[3]-i[1]
             center=(int(i[2]-width/2),int((i[3]-height*body_multiplier)))
-            centers.append(center)
-            distance.append(math.sqrt((center[0]-x/2)**2+(center[1]-y/2)**2))
-    if len(centers)==0:
+            distance.append((math.sqrt((center[0]-x/2)**2+(center[1]-y/2)**2),width+height,center))
+    if len(distance)==0:
         return
-    return centers[distance.index(min(distance,default=None))]
+    return sorted(distance,key=lambda x: (-x[1],x[0]))[0][2]
 
 sqrt3 = np.sqrt(3)
 sqrt5 = np.sqrt(5)
@@ -85,10 +81,10 @@ def mouse(rl,act_distance,body_multiplier,x,y,mouse_speed):
 def create_thread(start_x, start_y, dest_x, dest_y,distance,t,G_0=20, W_0=5, M_0=12, D_0=15):
     return Thread(target=wind_mouse,args=(start_x,start_y,dest_x,dest_y,distance,t,G_0, W_0, M_0, D_0))
 
-x_plus=int((1920-640)/2)
-y_plus=int((1080-640)/2)
+x_plus=int((1920-320)/2)
+y_plus=int((1080-320)/2)
 
-monitor = {"top": y_plus, "left": x_plus, "width": 640, "height": 640}
+monitor = {"top": y_plus, "left": x_plus, "width": 320, "height": 320}
 sct = mss.mss()
 
 
@@ -137,8 +133,8 @@ def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
         #cv2.imshow('debug',np.squeeze(result.render())) 
         cv2.waitKey(0)
         print("fps:",1/(perf_counter() - last_time),end='\r')
-        fps[i]=1 / (perf_counter() - last_time)
-        i+=1 
+        #fps[i]=1 / (perf_counter() - last_time)
+        #i+=1 
     print(np.average(fps))
 
-Aimbot("Counter Strike: Global Offensive",1850,5,640,640,0.82)
+Aimbot("Counter Strike: Global Offensive",1850,5,320,320,0.82)
