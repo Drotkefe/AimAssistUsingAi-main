@@ -8,8 +8,6 @@ import torch
 import more_data
 from sklearn.utils import shuffle
 
-
-data=pd.read_csv('trajectory_file.csv')
 def make_array_from_data(data):
     array=data.values
     for i in range(data.shape[0]):
@@ -97,15 +95,17 @@ def remove_zeros_completly(x):
             i-=1
     return x
 s=time.time()
+data=pd.read_csv('trajectory_file.csv')
 array=make_array_from_data(data)
 data=create_data(array)
 
-for i in range(1,10):
-   plot_path(data[-i])
+""" for i in range(1,10):
+   plot_path(data[-i]) """
 dataset=Create_Dataset(remove_zeros_completly(final_array(data)))
 dataset.extend(more_data.path_dataset)
 dataset=shuffle(dataset)
 print("Eltelt idő: {} mp az adatok beolvasásával".format(round(time.time()-s,2)))
+print("Minták száma: {}".format(len(dataset)))
 
 
 
