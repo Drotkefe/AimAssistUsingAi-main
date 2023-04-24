@@ -137,4 +137,5 @@ def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
         #i+=1 
     print(np.average(fps))
 
-Aimbot("Counter Strike: Global Offensive",1850,5,320,320,0.82)
+if __name__ == "__main__":
+    Aimbot("Counter Strike: Global Offensive",1850,5,320,320,0.82)
