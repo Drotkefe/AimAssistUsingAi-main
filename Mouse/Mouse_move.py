@@ -27,7 +27,7 @@ class PathNet(nn.Module):
 
 path=PathNet()
 path.to(device)
-path.load_state_dict(torch.load("./models/path_network_large_data_x"))
+path.load_state_dict(torch.load("./models/path_network_state_x"))
 
 def generate_path(path_model, s, t):
     pred_path = []
@@ -83,6 +83,6 @@ def plot_path(path):
     plt.show()
 
 s1=time.time()
-eger=generate_path(path,(0,0),(863,227))
+eger=generate_path(path,(0,0),(1874,500))
 print("idő:",time.time()-s1)
 plot_path(eger)
