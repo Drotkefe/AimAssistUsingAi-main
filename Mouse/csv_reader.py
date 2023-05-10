@@ -7,6 +7,7 @@ import numpy as np
 import torch
 import more_data
 from sklearn.utils import shuffle
+import random
 
 def make_array_from_data(data):
     array=data.values
@@ -37,10 +38,12 @@ def plot_path(path):
         x_sum+=path[i]
         y_sum+=path[i+1]
         
-    plt.plot(x,y)
-    plt.title("Go To:  "+str(path[0])+","+str(path[1]))
+    plt.plot(x,y,linewidth=3)
+    plt.title("Go To:  "+str(path[0])+","+str(path[1]),fontsize=25)
     plt.xlim(-1920, 1920)
     plt.ylim(-1080, 1080)
+    plt.yticks(fontsize=14)
+    plt.xticks(fontsize=14)
     plt.gca().invert_yaxis()
     plt.show()
 
@@ -98,9 +101,8 @@ s=time.time()
 data=pd.read_csv('trajectory_file.csv')
 array=make_array_from_data(data)
 data=create_data(array)
-
-""" for i in range(1,10):
-   plot_path(data[-i]) """
+for i in range(10):
+   plot_path(data[random.randint(0,1314)])
 dataset=Create_Dataset(remove_zeros_completly(final_array(data)))
 dataset.extend(more_data.path_dataset)
 dataset=shuffle(dataset)

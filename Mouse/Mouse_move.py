@@ -7,6 +7,8 @@ from torchvision import datasets, transforms
 import numpy as np
 import time
 import matplotlib.pyplot as plt
+import win32api
+import random
 
 device = torch.device('cuda:0')
 
@@ -75,14 +77,22 @@ def plot_path(path):
         x_sum+=path[i][0]
         y_sum+=path[i][1]
 
-    plt.plot(x,y)
-    plt.title("Go To:  "+str(path[-1][0])+","+str(path[-1][1]))
+    plt.plot(x,y,linewidth=3)
+    plt.title("Go To:  "+str(path[-1][0])+","+str(path[-1][1]),fontsize=25)
+    plt.yticks(fontsize=14)
+    plt.xticks(fontsize=14)
     plt.xlim(-1920, 1920)
     plt.ylim(-1080, 1080)
     plt.gca().invert_yaxis()
     plt.show()
 
+def mouse_move(path):
+    for i in path:
+        win32api.mouse_event(0x0001,i[0],i[1])
+        time.sleep(0.01)
+
 s1=time.time()
-eger=generate_path(path,(0,0),(1874,500))
+eger=generate_path(path,(0,0),(914,214))
 print("idő:",time.time()-s1)
+#mouse_move(eger[0:-2])
 plot_path(eger)
