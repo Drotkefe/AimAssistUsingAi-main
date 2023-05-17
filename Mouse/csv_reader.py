@@ -97,17 +97,35 @@ def remove_zeros_completly(x):
             path.remove(path[i])
             i-=1
     return x
-s=time.time()
-data=pd.read_csv('trajectory_file.csv')
+
+data=pd.read_csv('data/trajectory_file.csv')
 array=make_array_from_data(data)
 data=create_data(array)
-for i in range(10):
-   plot_path(data[random.randint(0,1314)])
+data_trimmed=trim_zeros_from_back(final_array(data))
+
 dataset=Create_Dataset(remove_zeros_completly(final_array(data)))
 dataset.extend(more_data.path_dataset)
 dataset=shuffle(dataset)
-print("Eltelt idő: {} mp az adatok beolvasásával".format(round(time.time()-s,2)))
-print("Minták száma: {}".format(len(dataset)))
+
+def main():
+    s=time.time()
+    
+    for i in range(10):
+        plot_path(data[random.randint(0,1314)])
+
+    for i in data:
+        if (i[0]==-20 and i[1]==607):
+            print(len(trim_zeros_from_back(i)))
+
+    
+    print("Eltelt idő: {} mp az adatok beolvasásával".format(round(time.time()-s,2)))
+    print("Minták száma: {}".format(len(dataset)))
+
+if __name__ == '__main__':
+    main()
+    
+
+
 
 
 

@@ -56,7 +56,7 @@ def generate_path(path_model, s, t):
         #If no more movement is generated stop generating movement
         if prev_dist == dist:
             is_stuck += 1
-            if is_stuck > 2:
+            if is_stuck > 10:
                 break
         else:
             is_stuck = 0 
@@ -92,7 +92,11 @@ def mouse_move(path):
         time.sleep(0.01)
 
 s1=time.time()
-eger=generate_path(path,(0,0),(914,214))
+for i in range(20):
+    eger=generate_path(path,(0,0),(random.randint(0,1421),random.randint(0,874)))
+    plot_path(eger)
+#eger=generate_path(path,(0,0),(0,150))
+print(len(eger))
 print("idő:",time.time()-s1)
 #mouse_move(eger[0:-2])
 plot_path(eger)
