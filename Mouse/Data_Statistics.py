@@ -41,19 +41,30 @@ def plot_path(path):
         y_sum+=path[i+1]
         
     plt.plot(x,y,'bo-')
-    plt.title("Human mouse movement from (0,0) to ("+str(path[0])+","+str(path[1])+")",fontsize=25)
+    #plt.title("Human mouse movement from (0,0) to ("+str(path[0])+","+str(path[1])+")",fontsize=25)
     plt.xlim(-1920, 1920)
     plt.ylim(-1080, 1080)
+    plt.ylabel("Y",fontsize=18)
+    plt.xlabel("X",fontsize=18)
     plt.yticks(fontsize=14)
     plt.xticks(fontsize=14)
     plt.gca().invert_yaxis()
     plt.show()
+
+
+def get_index(startx,starty):
+    for i in range(len(data)):
+        if data[i][0]==startx and data[i][1]==starty:
+            return i
+            
 
 def main():
     print("Minták száma",len(data_trimmed))
     print("Átlagos lépésszám hossz:",avg_lenght_of_one_path())
     print("Legnagyobb lépés:",max_step_size())
     print("Átlagos pixel mérték lépésenként:",avg_step_size())
+
+    plot_path(data[get_index(-1322,-561)])
 
     for i in range(10):
         plot_path(data[random.randint(0,1314)])
