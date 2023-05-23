@@ -12,6 +12,7 @@ ctk.set_default_color_theme("dark-blue")
 
 window=ctk.CTk()
 window.geometry("1300x750")
+window.title("Projectwork UI")
 #window.resizable(0,0)
 window.grid_columnconfigure(1, weight=2)
 
