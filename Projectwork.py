@@ -89,8 +89,14 @@ sct = mss.mss()
 
 
 img=np.array(sct.grab(monitor))
-def Camera_Thread():
+def Camera_Thread(x,y):
+    x_plus=int((1920-x)/2)
+    y_plus=int((1080-y)/2)
+
+    monitor = {"top": y_plus, "left": x_plus, "width": x, "height": y}
+    sct = mss.mss()
     global img
+    img=np.array(sct.grab(monitor))
     while True:
         img=np.array(sct.grab(monitor))
 
@@ -106,8 +112,6 @@ def Camera_Thread():
 
 
 
-
-
 def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
     if (torch.cuda.is_available()):
         print(torch.cuda.get_device_name(0))
@@ -119,7 +123,7 @@ def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
     """ p = psutil.Process(os.getpid())
     p.nice(psutil.HIGH_PRIORITY_CLASS) """
     model=torch.hub.load('ultralytics/yolov5','custom',path=game)
-    camera=Thread(target=Camera_Thread)
+    camera=Thread(target=Camera_Thread,args=(x,y))
     camera.start()
     while True:
         last_time=perf_counter()

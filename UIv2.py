@@ -105,13 +105,14 @@ def return_run_values():
     print(combobox_1.get(),int(act_range.get()),round(speed_range.get(),2),int(size_x_range.get()),int(size_y_range.get()),((int(crosshair_range.get())-80)*-0.8)/530+0.9)
     return combobox_1.get(),int(act_range.get()),round(speed_range.get(),2),int(size_x_range.get()),int(size_y_range.get()),((int(crosshair_range.get())-80)*-0.8)/530+0.9
 
-new_thread=multiprocessing.Process()
+
 
 stop=False
 def run_button_pressed():
     global stop
     global new_thread
-    new_thread=multiprocessing.Process(target=Aimbot,args=(return_run_values()))
+    if(stop==False):
+        new_thread=multiprocessing.Process(target=Aimbot,args=(return_run_values()))
     if(stop==False):
         new_thread.start()
         run_button.configure(text="Stop")
