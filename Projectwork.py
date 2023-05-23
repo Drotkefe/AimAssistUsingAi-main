@@ -6,7 +6,7 @@ import mss
 import numpy as np
 import torch
 from threading import Thread
-
+import psutil, os
 
 def Closest_enemy(list,body_multiplier,x,y):
     distance=[]
@@ -78,8 +78,8 @@ def mouse(rl,act_distance,body_multiplier,x,y,mouse_speed):
             t1.start() """
             wind_mouse(x/2,y/2,dest[0],dest[1],distance=5,t=0,M_0=int(1*mouse_speed))
 
-def create_thread(start_x, start_y, dest_x, dest_y,distance,t,G_0=20, W_0=5, M_0=12, D_0=15):
-    return Thread(target=wind_mouse,args=(start_x,start_y,dest_x,dest_y,distance,t,G_0, W_0, M_0, D_0))
+""" def create_thread(start_x, start_y, dest_x, dest_y,distance,t,G_0=20, W_0=5, M_0=12, D_0=15):
+    return Thread(target=wind_mouse,args=(start_x,start_y,dest_x,dest_y,distance,t,G_0, W_0, M_0, D_0)) """
 
 x_plus=int((1920-320)/2)
 y_plus=int((1080-320)/2)
@@ -107,23 +107,23 @@ def Camera_Thread():
 
 
 
+
 def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
-    fps=np.zeros(1500)
     if (torch.cuda.is_available()):
         print(torch.cuda.get_device_name(0))
     if(game=="Counter Strike: Global Offensive"):
-        game="CS_GO_Modell.engine"
+        game="CS_GO_Modell.pt"
     else:
         game="Valorant.pt"
+    
+    """ p = psutil.Process(os.getpid())
+    p.nice(psutil.HIGH_PRIORITY_CLASS) """
     model=torch.hub.load('ultralytics/yolov5','custom',path=game)
     camera=Thread(target=Camera_Thread)
     camera.start()
-
-    i=0
-    while True and i<1500:
+    while True:
         last_time=perf_counter()
         #img=np.array(camera.grab(region=region)) #dxcamban dxcam duplicator.py és 0-at 100ra
-        last_time=perf_counter()
         result=model(img)
         rl=result.xyxy[0].tolist()
         #print("fps:",1/(perf_counter() - last_time),end='\r')
@@ -133,9 +133,8 @@ def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
         #cv2.imshow('debug',np.squeeze(result.render())) 
         cv2.waitKey(0)
         print("fps:",1/(perf_counter() - last_time),end='\r')
-        #fps[i]=1 / (perf_counter() - last_time)
-        #i+=1 
-    print(np.average(fps))
+
 
 if __name__ == "__main__":
+
     Aimbot("Counter Strike: Global Offensive",1850,5,320,320,0.82)
