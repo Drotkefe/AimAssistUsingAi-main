@@ -7,6 +7,7 @@ import numpy as np
 import torch
 from threading import Thread
 import psutil, os
+import time
 
 def Closest_enemy(list,body_multiplier,x,y):
     distance=[]
@@ -22,6 +23,7 @@ def Closest_enemy(list,body_multiplier,x,y):
 
 sqrt3 = np.sqrt(3)
 sqrt5 = np.sqrt(5)
+run=False
 def wind_mouse(start_x, start_y, dest_x, dest_y,distance,t, G_0=20, W_0=5, M_0=3, D_0=15):
     '''
     WindMouse algorithm. Calls the move_mouse with each new step.
@@ -33,6 +35,7 @@ def wind_mouse(start_x, start_y, dest_x, dest_y,distance,t, G_0=20, W_0=5, M_0=3
     '''
     current_x,current_y = start_x,start_y
     v_x = v_y = W_x = W_y = 0
+    global run
     step=0
     while (dist:=np.hypot(dest_x-start_x,dest_y-start_y)) >= distance and step < 15:
         W_mag = min(W_0, dist)
@@ -60,6 +63,7 @@ def wind_mouse(start_x, start_y, dest_x, dest_y,distance,t, G_0=20, W_0=5, M_0=3
         if current_x != move_x or current_y != move_y:
             #This should wait for the mouse polling interval
             #time.sleep(0.01)
+            run=True
             for i in range(t):
                 pass
             #print(int(v_x),int(v_y))
@@ -68,6 +72,7 @@ def wind_mouse(start_x, start_y, dest_x, dest_y,distance,t, G_0=20, W_0=5, M_0=3
             #eger.move(int(v_x),int(v_y))
             step+=1
         step+=1
+    run=False
 
             
 def mouse(rl,act_distance,body_multiplier,x,y,mouse_speed):
@@ -76,19 +81,12 @@ def mouse(rl,act_distance,body_multiplier,x,y,mouse_speed):
         if dest!=None and np.hypot(dest[0]-x/2,dest[1]-y/2) < act_distance:
             """ t1=create_thread(x/2,y/2,dest[0],dest[1],distance=2,t=0,G_0=20,W_0=5,M_0=12,D_0=15)
             t1.start() """
-            wind_mouse(x/2,y/2,dest[0],dest[1],distance=5,t=0,M_0=int(1*mouse_speed))
+            wind_mouse(x/2,y/2,dest[0],dest[1],distance=5,t=int(10000/mouse_speed),M_0=int(2*mouse_speed))
 
 """ def create_thread(start_x, start_y, dest_x, dest_y,distance,t,G_0=20, W_0=5, M_0=12, D_0=15):
     return Thread(target=wind_mouse,args=(start_x,start_y,dest_x,dest_y,distance,t,G_0, W_0, M_0, D_0)) """
 
-x_plus=int((1920-320)/2)
-y_plus=int((1080-320)/2)
 
-monitor = {"top": y_plus, "left": x_plus, "width": 320, "height": 320}
-sct = mss.mss()
-
-
-img=np.array(sct.grab(monitor))
 def Camera_Thread(x,y):
     x_plus=int((1920-x)/2)
     y_plus=int((1080-y)/2)
@@ -120,20 +118,23 @@ def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
     else:
         game="Valorant.pt"
     
-    """ p = psutil.Process(os.getpid())
-    p.nice(psutil.HIGH_PRIORITY_CLASS) """
+    p = psutil.Process(os.getpid())
+    p.nice(psutil.HIGH_PRIORITY_CLASS)
+
     model=torch.hub.load('ultralytics/yolov5','custom',path=game)
     camera=Thread(target=Camera_Thread,args=(x,y))
     camera.start()
+    time.sleep(0.5) # wait for camera relase one img
     while True:
         last_time=perf_counter()
         #img=np.array(camera.grab(region=region)) #dxcamban dxcam duplicator.py és 0-at 100ra
-        result=model(img)
+        result=model(img,size=x)
         rl=result.xyxy[0].tolist()
         #print("fps:",1/(perf_counter() - last_time),end='\r')
         #t1=Thread(target=mouse,args=(rl,act_distance,body_multiplier,x,y,mouse_speed))
         #last_time=perf_counter()
-        mouse(rl,act_distance,body_multiplier,x,y,mouse_speed)
+        if(run!=True):
+            mouse(rl,act_distance,body_multiplier,x,y,mouse_speed)
         #cv2.imshow('debug',np.squeeze(result.render())) 
         cv2.waitKey(0)
         print("fps:",1/(perf_counter() - last_time),end='\r')
@@ -141,4 +142,4 @@ def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
 
 if __name__ == "__main__":
 
-    Aimbot("Counter Strike: Global Offensive",1850,5,320,320,0.82)
+    Aimbot("Counter Strike: Global Offensive",1850,1,320,320,0.82)

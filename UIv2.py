@@ -3,9 +3,7 @@ import customtkinter as ctk
 import tkinter as tk
 from PIL import Image, ImageTk
 from Projectwork import Aimbot 
-from threading import Thread
 import multiprocessing
-import time
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("dark-blue")
