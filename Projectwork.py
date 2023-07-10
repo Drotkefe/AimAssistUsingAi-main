@@ -8,6 +8,10 @@ import torch
 from threading import Thread
 import psutil, os
 import time
+from kalmanfilter import KalmanFilter
+
+
+kf = KalmanFilter()
 
 def Closest_enemy(list,body_multiplier,x,y):
     distance=[]
@@ -74,15 +78,24 @@ def wind_mouse(start_x, start_y, dest_x, dest_y,distance,t, G_0=20, W_0=5, M_0=3
         step+=1
     run=False
 
-            
+movement=[]
+predicted_aim=[0,0]
 def mouse(rl,act_distance,body_multiplier,x,y,mouse_speed):
     if len(rl)>0:
         dest=Closest_enemy(rl,body_multiplier,x,y)
         if dest!=None and np.hypot(dest[0]-x/2,dest[1]-y/2) < act_distance:
             """ t1=create_thread(x/2,y/2,dest[0],dest[1],distance=2,t=0,G_0=20,W_0=5,M_0=12,D_0=15)
             t1.start() """
-            wind_mouse(x/2,y/2,dest[0],dest[1],distance=5,t=int(10000/mouse_speed),M_0=int(2*mouse_speed))
-
+            movement.append(dest)
+            predicted_aim=kf.predict(movement[-1][0],movement[-1][1])
+            # if len(movement)<6:
+            #     wind_mouse(x/2,y/2,dest[0],dest[1],distance=3,t=int(0),M_0=int(1*mouse_speed))
+            # else:
+            #     wind_mouse(x/2,y/2,predicted_aim[0],predicted_aim[1],distance=3,t=int(0),M_0=int(1*mouse_speed))
+            #     #print("valodi:",dest[0],dest[1],"predictált:", predicted_aim[0],predicted_aim[1])
+            wind_mouse(x/2,y/2,dest[0],dest[1],distance=3,t=int(10000),M_0=int(2*mouse_speed))
+    else:
+        movement.clear()
 """ def create_thread(start_x, start_y, dest_x, dest_y,distance,t,G_0=20, W_0=5, M_0=12, D_0=15):
     return Thread(target=wind_mouse,args=(start_x,start_y,dest_x,dest_y,distance,t,G_0, W_0, M_0, D_0)) """
 
@@ -142,4 +155,4 @@ def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
 
 if __name__ == "__main__":
 
-    Aimbot("Counter Strike: Global Offensive",1850,1,320,320,0.82)
+    Aimbot("Counter Strike: Global Offensive",1850,5,800,320,0.82)
