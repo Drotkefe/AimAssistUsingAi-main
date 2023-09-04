@@ -66,8 +66,8 @@ def main():
 
     plot_path(data[get_index(-1322,-561)])
 
-    for i in range(10):
-        plot_path(data[random.randint(0,1314)])
+    for i in range(15):
+        plot_path(data[random.randint(0,len(data_trimmed))])
     
 
 if __name__ == '__main__':
