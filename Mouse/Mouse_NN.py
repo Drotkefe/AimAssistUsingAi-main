@@ -13,6 +13,7 @@ import time
 import csv_reader
 
 dataset=csv_reader.dataset
+print(len(dataset))
 
 class PathNet(nn.Module):
     def __init__(self):

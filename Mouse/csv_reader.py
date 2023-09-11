@@ -100,8 +100,11 @@ def remove_zeros_completly(x):
 
 data=pd.read_csv('data/trajectory_file.csv')
 array=make_array_from_data(data)
+#print(array[0])
 data=create_data(array)
+#print(data[0])
 data_trimmed=trim_zeros_from_back(final_array(data))
+#print(data_trimmed[0])
 
 dataset=Create_Dataset(remove_zeros_completly(final_array(data)))
 dataset.extend(more_data.path_dataset)

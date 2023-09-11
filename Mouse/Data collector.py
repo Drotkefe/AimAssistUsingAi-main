@@ -18,7 +18,7 @@ def get_distance(x,y):
 screen = pygame.display.set_mode([1920, 1080])
 
 header=['startx','starty','endx','endy','points']
-f=open('trajectory_file.csv', 'a', newline='')
+f=open('data/trajectory_file.csv', 'a', newline='')
 writer = csv.writer(f)
 #writer.writerow(header)
 
