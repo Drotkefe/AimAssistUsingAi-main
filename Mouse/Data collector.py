@@ -39,11 +39,11 @@ def trim(t):
             return t
 
 def lesser_than_1000(t):
-    return len(t)<=1000 if True else False
+    return len(t)<=800 if True else False
 
 def make_it_1000_padding(t):
-    for i in range(1000):
-        if i > len(t)-1 and len(t)<1001:
+    for i in range(800):
+        if i > len(t)-1 and len(t)<801:
             t.append((0,0))
     return t
 
@@ -57,7 +57,8 @@ def make_it_numbers(t):
 szamol=False
 running = True
 path=[]
-posx,posy=random.randint(5,1915),random.randint(5,1075)
+x_min,y_min,x_max,y_max=800,400,1200,700
+posx,posy=random.randint(x_min,x_max),random.randint(y_min,y_max)
 while running:
     s=time.time()
     for event in pygame.event.get():
@@ -68,8 +69,8 @@ while running:
             init_posy=posy
             if szamol==False:
                 szamol=True
-                posx=random.randint(5,1915)
-                posy=random.randint(5,1075)
+                posx=random.randint(x_min,x_max)
+                posy=random.randint(y_min,y_max)
                 path=[]
                 path.append((init_posx,init_posy))
                 path_rel=[]

@@ -56,14 +56,20 @@ def get_index(startx,starty):
     for i in range(len(data)):
         if data[i][0]==startx and data[i][1]==starty:
             return i
-            
+
+def longest_path():
+    max=len(data_trimmed[0])
+    for i in data_trimmed:
+        if len(i)>max:
+            max=len(i)
+    return max
 
 def main():
     print("Minták száma",len(data_trimmed))
     print("Átlagos lépésszám hossz:",avg_lenght_of_one_path())
     print("Legnagyobb lépés:",max_step_size())
     print("Átlagos pixel mérték lépésenként:",avg_step_size())
-
+    print(longest_path())
     plot_path(data[get_index(-1322,-561)])
 
     for i in range(15):
