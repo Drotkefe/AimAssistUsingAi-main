@@ -16,6 +16,7 @@ def get_distance(x,y):
     return round(math.sqrt((x-mouse_cord[0])**2+(y-mouse_cord[1])**2),2)
 
 screen = pygame.display.set_mode([1920, 1080])
+ 
 
 header=['startx','starty','endx','endy','points']
 f=open('data/trajectory_file.csv', 'a', newline='')
@@ -91,14 +92,14 @@ while running:
                 
                 
                
-    screen.fill((255, 255, 255))
+    screen.fill((49, 47, 56))
 
     pygame.draw.circle(screen, (0, 0, 255), (posx, posy), 5)
     if szamol:
         pygame.draw.circle(screen,(255,0,0), (1850,80),20)
         if get_distance(posx,posy) > 0.5:
             get_mouse_data()
-        
+
     pygame.display.flip()
     #print(time.time()-s)
 
