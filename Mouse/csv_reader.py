@@ -54,12 +54,25 @@ def add_tuple_to_array(array):
         tuppled.append(cord)
     return tuppled
 
-def final_array(array):
+def add_array_to_array(array):
+    new_array=[]
+    for i in range(0,len(array)-1,2):
+        cord=[array[i],array[i+1]]
+        new_array.append(cord)
+    return new_array
+
+def final_array_tuple(array):
     final=[]
     for line in array:
         final.append(add_tuple_to_array(line))
     return final
 
+def final_array_array(array):
+    final=[]
+    for line in array:
+        final.append(add_array_to_array(line))
+    return final
+                      
 def Create_Dataset(data):
     dataset=[]
     for path in data:
@@ -89,7 +102,6 @@ def trim_zeros_from_back(x):
     return x
 
 
-
 def remove_zeros_completly(x):
     for path in x:
         i=len(path)-1
@@ -98,15 +110,44 @@ def remove_zeros_completly(x):
             i-=1
     return x
 
-data=pd.read_csv('data/trajectory_file.csv')
-array=make_array_from_data(data)
-#print(array[0])
+def remove_label(data):
+    for d in data:
+        for i in range(0,2):
+            d.remove(d[0])
+
+def get_numpy_labels(data):
+    labels=[]
+    for i in range(len(data)):
+            labels.append([data[i][0],data[i][1]])
+    return np.array(labels)
+
+data_df=pd.read_csv('data/trajectory_file.csv')
+array=make_array_from_data(data_df)
 data=create_data(array)
-#print(data[0])
-data_trimmed=final_array(data)
+
+
+
+numpy_Y=get_numpy_labels(data)
+print("Cimkék:",numpy_Y.shape)
+
+for i in range(1324,len(data)):
+    if len(data[i])!=2000:
+        for j in range(2000-len(data[i])):
+            data[i].append(0)
+
+
+remove_label(data)
+a=np.array(data)
+a=np.array(a.reshape(len(data),999,2))
+print("Minták:",a.shape)
+
+numpy_X=a
+
+data_array=final_array_array(data)
+data_trimmed=final_array_tuple(data)
 #print(data_trimmed[0])
 
-dataset=Create_Dataset(remove_zeros_completly(final_array(data)))
+dataset=Create_Dataset(remove_zeros_completly(final_array_tuple(data)))
 dataset.extend(more_data.path_dataset)
 dataset=shuffle(dataset)
 
@@ -114,15 +155,10 @@ def main():
     s=time.time()
     
     for i in range(10):
-        plot_path(data[random.randint(0,1314)])
-
-    for i in data:
-        if (i[0]==-20 and i[1]==607):
-            print(len(trim_zeros_from_back(i)))
-
+        plot_path(data[random.randint(0,len(data))])
     
     print("Eltelt idő: {} mp az adatok beolvasásával".format(round(time.time()-s,2)))
-    print("Minták száma: {}".format(len(dataset)))
+    print("Minták száma: {}".format(len(data)))
 
 if __name__ == '__main__':
     main()

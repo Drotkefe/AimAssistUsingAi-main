@@ -40,11 +40,11 @@ def trim(t):
             return t
 
 def lesser_than_1000(t):
-    return len(t)<=800 if True else False
+    return len(t)<=1000 if True else False
 
 def make_it_1000_padding(t):
-    for i in range(800):
-        if i > len(t)-1 and len(t)<801:
+    for i in range(1000):
+        if i > len(t)-1 and len(t)<1001:
             t.append((0,0))
     return t
 

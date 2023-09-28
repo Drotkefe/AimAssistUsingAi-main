@@ -70,7 +70,7 @@ def main():
     print("Legnagyobb lépés:",max_step_size())
     print("Átlagos pixel mérték lépésenként:",avg_step_size())
     print(longest_path())
-    plot_path(data[get_index(-1322,-561)])
+    #plot_path(data[get_index(-1322,-561)])
 
     for i in range(15):
         plot_path(data[random.randint(0,len(data_trimmed))])

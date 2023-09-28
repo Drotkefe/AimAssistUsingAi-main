@@ -20,25 +20,14 @@ device = (
 )
 print(f"Using {device} device")
 
-d=csv_reader.data_trimmed   #próbáljuk ki a csúnyábbik beolvasással, ahol még nem tuple-k
-def create_labels(dataset):
-    labels=[]
-    for i in dataset:
-        labels.append(i[0])
-    return labels
+X=csv_reader.numpy_X  
+Y=csv_reader.numpy_Y
 
-labels=create_labels(d)
+def get_unique_labels(y):
+    unique_data = [list(x) for x in set(tuple(x) for x in Y)]
+    return len(unique_data)
 
-def create_data(dataset):
-    data=[]
-    for i in dataset:
-        data.append(i[1:])
-    return data
-
-data=create_data(d)
-
-dataset=[[labels[i], data[i]] for i in range(len(d))]
-
+class_numbers=get_unique_labels(Y)
 
 class Discriminator(nn.Module):
     def __init__(self):
@@ -63,7 +52,9 @@ class Discriminator(nn.Module):
         )
 
     def forward(self, x, label):
-        x=torch.cat([x,label],1)
+        x=torch.cat([label,x],1)
+        print(label.dtype)
+        print(x.dtype)
         output = self.model(x)
         return output
     
@@ -170,11 +161,11 @@ for epoch in range(epochs):
     
     print('Starting epoch {}...'.format(epoch+1))
     
-    for i, (labels, data) in enumerate(data_loader):
+    for i,(labels, data) in enumerate(data_loader):
         
         # Train data
-        real_data = Variable(data[i][i])
-        labels = Variable(labels[i])
+        real_data = Variable(data).to(device)
+        labels = Variable(labels[i]).to(device)
         
         # Set generator train
         generator.train()
