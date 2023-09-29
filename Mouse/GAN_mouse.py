@@ -11,14 +11,8 @@ from torchvision.utils import make_grid
 import matplotlib.pyplot as plt
 import csv_reader
 
-device = (
-    "cuda"
-    if torch.cuda.is_available()
-    else "mps"
-    if torch.backends.mps.is_available()
-    else "cpu"
-)
-print(f"Using {device} device")
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+print('device:', device)
 
 X=csv_reader.numpy_X  
 Y=csv_reader.numpy_Y
@@ -32,62 +26,72 @@ class_numbers=get_unique_labels(Y)
 class Discriminator(nn.Module):
     def __init__(self):
         super().__init__()
+        self.label_emb = nn.Embedding(class_numbers, class_numbers)
+
         self.model = nn.Sequential(
-            nn.Linear(1000, 1024),
-            nn.ReLU(),
+            nn.Linear(999*2+class_numbers, 2048),
+            nn.LeakyReLU(0.2,inplace=True),
+            nn.Dropout(0.3),
+            nn.Linear(2048, 1024),
+            nn.LeakyReLU(0.2,inplace=True),
             nn.Dropout(0.3),
             nn.Linear(1024, 512),
-            nn.ReLU(),
+            nn.LeakyReLU(0.2,inplace=True),
             nn.Dropout(0.3),
             nn.Linear(512, 256),
-            nn.ReLU(),
+            nn.LeakyReLU(0.2,inplace=True),
             nn.Dropout(0.3),
             nn.Linear(256, 128),
-            nn.ReLU(),
+            nn.LeakyReLU(0.2,inplace=True),
             nn.Dropout(0.3),
-            nn.Linear(128, 64),
-            nn.Dropout(0.3),
-            nn.Linear(64, 1),
+            nn.Linear(128, 1),
             nn.Sigmoid(),
         )
 
     def forward(self, x, label):
-        x=torch.cat([label,x],1)
-        print(label.dtype)
-        print(x.dtype)
+        x = x.view(-1, 999*2)
+        c=self.label_emb(label)
+        x=torch.cat([x,c],1)
         output = self.model(x)
-        return output
-    
+        return output.squeeze()
+
+z_size=200
+
 class Generator(nn.Module):
     def __init__(self):
         super().__init__()
+        self.label_emb = nn.Embedding(class_numbers,class_numbers)
         self.model = nn.Sequential(
-            nn.Linear(200, 256),
-            nn.ReLU(),
-            nn.Linear(256, 512),
-            nn.ReLU(),
+            nn.Linear(z_size+class_numbers, 512),
+            nn.LeakyReLU(0.2,inplace=True),
             nn.Linear(512, 1024),
-            nn.ReLU(),
-            nn.Linear(1024, 1000),
+            nn.LeakyReLU(0.2,inplace=True),
+            nn.Linear(1024, 2048),
+            nn.LeakyReLU(0.2,inplace=True),
+            nn.Linear(2048, 999*2),
             nn.Tanh()
         )
 
-    def forward(self, x, labels):
-        x=torch.cat([x,labels],1)
-        output = self.model(x)
-        return output
+    def forward(self, z, labels):
+        z=z.view(-1,z_size)
+        c=self.label_emb(labels)
+        z=torch.cat([z,labels],1)
+        out = self.model(z)
+        return out.view(-1,999*2)
 
 
 batch_size = 128  # Batch size
 epochs = 300  # Train epochs
 learning_rate = 0.0001
-
 num_epochs = 300
 loss_function = nn.BCELoss()
+
+dataset=[(X[i], Y[i]) for i in range(X.shape[0])]
 data_loader=torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=False)
 
 generator=Generator().to(device)
 discriminator=Discriminator().to(device)
+
 
 g_optimizer = torch.optim.Adam(generator.parameters(), lr=learning_rate)
 d_optimizer = torch.optim.Adam(discriminator.parameters(), lr=learning_rate)
@@ -98,7 +102,7 @@ def generator_train_step(batch_size, discriminator, generator, g_optimizer, crit
     g_optimizer.zero_grad()
     
     # Building z
-    z = Variable(torch.randn(batch_size, 200)).to(device)
+    z = Variable(torch.randn(batch_size, z_size)).to(device)
     
     # Building fake labels
     fake_labels = Variable(torch.LongTensor(np.random.randint(0, 1920, batch_size))).to(device)
@@ -161,7 +165,7 @@ for epoch in range(epochs):
     
     print('Starting epoch {}...'.format(epoch+1))
     
-    for i,(labels, data) in enumerate(data_loader):
+    for i,(data, labels) in enumerate(data_loader):
         
         # Train data
         real_data = Variable(data).to(device)
