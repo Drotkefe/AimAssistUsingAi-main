@@ -49,6 +49,8 @@ def plot_path(path):
     plt.yticks(fontsize=14)
     plt.xticks(fontsize=14)
     plt.gca().invert_yaxis()
+    plt.plot(x[0], y[0], 'or')
+    plt.plot(x[-1], y[-1], 'or')
     plt.show()
 
 
