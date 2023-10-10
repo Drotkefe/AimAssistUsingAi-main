@@ -1,14 +1,5 @@
 import torch
 import torch.nn as nn
-import pandas as pd
-import numpy as np
-from torchvision import transforms
-from torch.utils.data import Dataset, DataLoader
-from PIL import Image
-from torch import autograd
-from torch.autograd import Variable
-from torchvision.utils import make_grid
-import matplotlib.pyplot as plt
 import csv_reader
 import matplotlib.pyplot as plt
 
@@ -23,16 +14,16 @@ class Discriminator(nn.Module):
     def __init__(self):
         super().__init__()
         self.model = nn.Sequential(
-            nn.Linear(2*999, 1024),
-            nn.ReLU(),
-            nn.Dropout(0.1),
-            nn.Linear(1024, 512),
+            nn.Linear(2*999, 512),
             nn.ReLU(),
             nn.Dropout(0.1),
             nn.Linear(512, 256),
             nn.ReLU(),
             nn.Dropout(0.1),
-            nn.Linear(256, 1),
+            nn.Linear(256, 128),
+            nn.ReLU(),
+            nn.Dropout(0.1),
+            nn.Linear(128, 1),
             nn.Sigmoid(),
         )
 
@@ -43,7 +34,7 @@ class Discriminator(nn.Module):
 
 discriminator = Discriminator().to(device=device)
 
-z_size=200
+z_size=500
 class Generator(nn.Module):
     def __init__(self):
         super().__init__()
@@ -56,7 +47,9 @@ class Generator(nn.Module):
             nn.ReLU(),
             nn.Linear(1024, 2048),
             nn.ReLU(),
-            nn.Linear(2048, 2*999),
+            nn.Linear(2048, 4*999),
+            nn.ReLU(),
+            nn.Linear(4*999, 2*999),
             nn.Tanh(),
         )
 
@@ -68,7 +61,7 @@ class Generator(nn.Module):
 generator = Generator().to(device=device)
 
 lr = 0.0001
-num_epochs = 1000
+num_epochs = 15
 loss_function = nn.BCELoss()
 batch_size = 32
 
@@ -78,6 +71,8 @@ optimizer_generator = torch.optim.Adam(generator.parameters(), lr=lr)
 
 data_loader=torch.utils.data.DataLoader(X, batch_size=batch_size, shuffle=False)
 
+dmetrics_loss=[]
+gmetrics_loss=[]
 
 for epoch in range(num_epochs):
     for n, (real_samples) in enumerate(data_loader):
@@ -123,20 +118,38 @@ for epoch in range(num_epochs):
         optimizer_generator.step()
 
         # Show loss
+        dmetrics_loss.append(loss_discriminator.cpu().detach())
+        gmetrics_loss.append(loss_generator.cpu().detach())
+
         if n==batch_size-1:
             print(f"Epoch: {epoch} Loss D.: {loss_discriminator}")
             print(f"Epoch: {epoch} Loss G.: {loss_generator}")
+            
+
+def plot_metrics():
+    x=[i for i in range(1,len(dmetrics_loss)+1)]
+    plt.plot(x,dmetrics_loss,'r')
+    plt.plot(x,gmetrics_loss,'b')
+    plt.xlabel('Training iteration')
+    plt.ylabel('Loss')
+    plt.show()
+
+plot_metrics()
 
 latent_space_samples = torch.randn(batch_size, z_size).to(device=device)
 generated_samples = generator(latent_space_samples)
-torch.save(generator,"models\gan_models\model_200.pth")
+#torch.save(generator,"models\gan_models\model.pth")
+model_scripted = torch.jit.script(generator)
+model_scripted.save('models\gan_models\lajos.pt') 
+
+
 generated_samples = generated_samples.cpu().detach()
 
 def get_path(sample):
     path=[]
     for i in range(len(sample)):
-        path.append(int(sample[i][0]*6.65))
-        path.append(int(sample[i][1]*6.65))
+        path.append(int(sample[i][0]*20.65))
+        path.append(int(sample[i][1]*20.65))
     return path
 
 def plot_path(path):
@@ -144,7 +157,7 @@ def plot_path(path):
     y=[]
     x_sum=0
     y_sum=0
-    for i in range(2,len(path)-1,2):
+    for i in range(0,len(path)-1,2):
         x.append(x_sum)
         y.append(y_sum)
         x_sum+=path[i]
@@ -163,5 +176,7 @@ def plot_path(path):
     plt.plot(x[-1], y[-1], 'or')
     plt.show()
 
-path=get_path(generated_samples[0])
-plot_path(path)
+
+for i in range(len(generated_samples)):
+    path=get_path(generated_samples[i])    
+    plot_path(path)

@@ -34,14 +34,14 @@ def plot_path(path):
     y=[]
     x_sum=0
     y_sum=0
-    for i in range(2,len(path)-1,2):
+    for i in range(0,len(path)-1,2):
         x.append(x_sum)
         y.append(y_sum)
         x_sum+=path[i]
         y_sum+=path[i+1]
         
     plt.plot(x,y,'bo-')
-    #plt.title("Human mouse movement from (0,0) to ("+str(path[0])+","+str(path[1])+")",fontsize=25)
+    plt.title("Human mouse movement from (0,0) to ("+str(x_sum)+","+str(y_sum)+")",fontsize=25)
     plt.xlim(-1920, 1920)
     plt.ylim(-1080, 1080)
     plt.ylabel("Y",fontsize=18)
@@ -75,7 +75,7 @@ def main():
     #plot_path(data[get_index(-1322,-561)])
 
     for i in range(15):
-        plot_path(data[random.randint(0,len(data_trimmed))])
+        plot_path(data[0])
     
 
 if __name__ == '__main__':
