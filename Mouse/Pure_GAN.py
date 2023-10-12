@@ -14,15 +14,18 @@ class Discriminator(nn.Module):
     def __init__(self):
         super().__init__()
         self.model = nn.Sequential(
-            nn.Linear(2*999, 512),
-            nn.ReLU(),
-            nn.Dropout(0.1),
-            nn.Linear(512, 256),
-            nn.ReLU(),
-            nn.Dropout(0.1),
+            nn.Linear(2*999, 1028),
+            nn.LeakyReLU(0.2),
+            nn.Dropout(0.2),
+            nn.Linear(1028, 516),
+            nn.LeakyReLU(0.2),
+            nn.Dropout(0.2),
+            nn.Linear(516, 256),
+            nn.LeakyReLU(0.2),
+            nn.Dropout(0.2),
             nn.Linear(256, 128),
-            nn.ReLU(),
-            nn.Dropout(0.1),
+            nn.LeakyReLU(0.2),
+            nn.Dropout(0.2),
             nn.Linear(128, 1),
             nn.Sigmoid(),
         )
@@ -34,7 +37,7 @@ class Discriminator(nn.Module):
 
 discriminator = Discriminator().to(device=device)
 
-z_size=500
+z_size=75
 class Generator(nn.Module):
     def __init__(self):
         super().__init__()
@@ -45,11 +48,7 @@ class Generator(nn.Module):
             nn.ReLU(),
             nn.Linear(512, 1024),
             nn.ReLU(),
-            nn.Linear(1024, 2048),
-            nn.ReLU(),
-            nn.Linear(2048, 4*999),
-            nn.ReLU(),
-            nn.Linear(4*999, 2*999),
+            nn.Linear(1024, 2*999),
             nn.Tanh(),
         )
 
@@ -147,7 +146,7 @@ generated_samples = generated_samples.cpu().detach()
 
 def get_path(sample):
     path=[]
-    for i in range(len(sample)):
+    for i in range(0,len(sample),3):
         path.append(int(sample[i][0]*20.65))
         path.append(int(sample[i][1]*20.65))
     return path
@@ -178,5 +177,6 @@ def plot_path(path):
 
 
 for i in range(len(generated_samples)):
-    path=get_path(generated_samples[i])    
+    path=get_path(generated_samples[0])    
+    path=get_path(generated_samples[5])    
     plot_path(path)
