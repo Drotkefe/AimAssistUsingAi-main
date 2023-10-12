@@ -99,8 +99,8 @@ def mouse_move(path):
 
 
 for i in range(20):
-    endx=random.randint(0,1421)
-    endy=random.randint(0,874)
+    endx=random.randint(-1421,0)
+    endy=random.randint(-874,0)
     s1=time.time()
     eger=generate_path(path,(0,0),(endx,endy))
     s2=np.round(time.time()-s1,3)

@@ -74,8 +74,8 @@ def main():
     print(longest_path())
     #plot_path(data[get_index(-1322,-561)])
 
-    for i in range(15):
-        plot_path(data[0])
+    for i in range(len(data)-1,1772,-1):
+        plot_path(data[i])
     
 
 if __name__ == '__main__':
