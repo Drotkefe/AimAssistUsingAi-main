@@ -1,6 +1,6 @@
 from csv_reader import data_trimmed,data
 import matplotlib.pyplot as plt
-import random
+
 
 def avg_lenght_of_one_path():
     osszeg=0
@@ -74,7 +74,7 @@ def main():
     print(longest_path())
     #plot_path(data[get_index(-1322,-561)])
 
-    for i in range(len(data)-1,1772,-1):
+    for i in range(len(data)-1,len(data)-10,-1):
         plot_path(data[i])
     
 
