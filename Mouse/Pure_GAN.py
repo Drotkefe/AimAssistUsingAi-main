@@ -64,7 +64,7 @@ num_epochs = 15
 loss_function = nn.BCELoss()
 batch_size = 32
 
-optimizer_discriminator = torch.optim.Adam(discriminator.parameters(), lr=lr)
+optimizer_discriminator = torch.optim.Adam(discriminator.parameters(), lr=lr/10)
 optimizer_generator = torch.optim.Adam(generator.parameters(), lr=lr)
 
 
@@ -146,9 +146,10 @@ generated_samples = generated_samples.cpu().detach()
 
 def get_path(sample):
     path=[]
-    for i in range(0,len(sample),3):
-        path.append(int(sample[i][0]*20.65))
-        path.append(int(sample[i][1]*20.65))
+    for i in range(0,len(sample)):
+        if (abs(sample[i][0])>0.017 or abs(sample[i][1])>0.017):
+            path.append(int(sample[i][0]*5.6))
+            path.append(int(sample[i][1]*5.6))
     return path
 
 def plot_path(path):
@@ -175,7 +176,7 @@ def plot_path(path):
     plt.plot(x[-1], y[-1], 'or')
     plt.show()
 
-
+print(generated_samples[0])
 for i in range(len(generated_samples)):
     path=get_path(generated_samples[0])    
     path=get_path(generated_samples[5])    
