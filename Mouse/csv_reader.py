@@ -138,7 +138,7 @@ print("Eltelt idő: {} mp az adatok beolvasásával".format(round(time.time()-s,
 numpy_Y=get_numpy_labels(data)
 print("Cimkék:",numpy_Y.shape)
 
-for i in range(1324,len(data)):
+for i in range(1324,2000):
     if len(data[i])!=2000:
         for j in range(2000-len(data[i])):
             data[i].append(0)

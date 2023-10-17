@@ -58,7 +58,7 @@ def make_it_numbers(t):
 szamol=False
 running = True
 path=[]
-x_min,y_min,x_max,y_max=800,400,961,561
+x_min,y_min,x_max,y_max=800,400,1200,750
 posx,posy=random.randint(x_min,x_max),random.randint(y_min,y_max)
 count=0
 while running:
