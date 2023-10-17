@@ -3,6 +3,7 @@ import time
 from ast import literal_eval
 import matplotlib.pyplot as plt
 import copy
+import math
 import numpy as np
 import torch
 import more_data
@@ -121,11 +122,18 @@ def get_numpy_labels(data):
             labels.append([data[i][0],data[i][1]])
     return np.array(labels)
 
+def get_lenghts(data):
+    lenghts=[]
+    for i in range(len(data)):
+        x=math.sqrt(data[i][0]**2+data[i][1]**2)
+        lenghts.append(x)
+    return lenghts
+
+s=time.time()
 data_df=pd.read_csv('data/trajectory_file.csv')
 array=make_array_from_data(data_df)
 data=create_data(array)
-
-
+print("Eltelt idő: {} mp az adatok beolvasásával".format(round(time.time()-s,2)))
 
 numpy_Y=get_numpy_labels(data)
 print("Cimkék:",numpy_Y.shape)
@@ -135,11 +143,26 @@ for i in range(1324,len(data)):
         for j in range(2000-len(data[i])):
             data[i].append(0)
 
+lenghts=get_lenghts(data)
+lenghts.sort()
+lenghts=np.round(lenghts)
+
+db_2=0
+db_6=0
+beyond=0
+for i in range(0,len(lenghts)):
+    if lenghts[i]<=200:
+        db_2+=1
+    elif lenghts[i]>200 and lenghts[i]<=600:
+        db_6+=1
+    else:
+        beyond+=1
+print("200-nál kisebb:",db_2,"\n200-600 között:",db_6,"\n600-on túl:    ",beyond)
 
 remove_label(data)
 a=np.array(data)
 a=np.array(a.reshape(len(data),999,2))
-print("Minták:",a.shape)
+
 
 numpy_X=a
 
@@ -151,14 +174,8 @@ dataset=Create_Dataset(remove_zeros_completly(final_array_tuple(data)))
 dataset.extend(more_data.path_dataset)
 dataset=shuffle(dataset)
 
-def main():
-    s=time.time()
-    
-    for i in range(10):
-        plot_path(data[random.randint(0,len(data))])
-    
-    print("Eltelt idő: {} mp az adatok beolvasásával".format(round(time.time()-s,2)))
-    print("Minták száma: {}".format(len(data)))
+def main():   
+    print("Minták:",a.shape)
 
 if __name__ == '__main__':
     main()
