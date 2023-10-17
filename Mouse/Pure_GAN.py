@@ -2,30 +2,34 @@ import torch
 import torch.nn as nn
 import csv_reader
 import matplotlib.pyplot as plt
+import numpy as np
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 print('torch version:',torch.__version__)
 print('device:', device)
 
-X=csv_reader.numpy_X  
+X=csv_reader.numpy_X
+
+np.random.seed(12)
+
 
 class Discriminator(nn.Module):
     def __init__(self):
         super().__init__()
         self.model = nn.Sequential(
             nn.Linear(2*999, 1028),
-            nn.LeakyReLU(0.2),
+            nn.LeakyReLU(),
             nn.Dropout(0.2),
             nn.Linear(1028, 516),
-            nn.LeakyReLU(0.2),
+            nn.LeakyReLU(),
             nn.Dropout(0.2),
             nn.Linear(516, 256),
-            nn.LeakyReLU(0.2),
-            nn.Dropout(0.2),
+            nn.LeakyReLU(),
+            nn.Dropout(0.1),
             nn.Linear(256, 128),
-            nn.LeakyReLU(0.2),
-            nn.Dropout(0.2),
+            nn.LeakyReLU(),
+            nn.Dropout(0.1),
             nn.Linear(128, 1),
             nn.Sigmoid(),
         )
@@ -37,7 +41,7 @@ class Discriminator(nn.Module):
 
 discriminator = Discriminator().to(device=device)
 
-z_size=75
+z_size=100
 class Generator(nn.Module):
     def __init__(self):
         super().__init__()
@@ -146,10 +150,9 @@ generated_samples = generated_samples.cpu().detach()
 
 def get_path(sample):
     path=[]
-    for i in range(0,len(sample)):
-        if (abs(sample[i][0])>0.017 or abs(sample[i][1])>0.017):
-            path.append(int(sample[i][0]*5.6))
-            path.append(int(sample[i][1]*5.6))
+    for i in range(0,150):
+        path.append(int(sample[i][0]*5.6))
+        path.append(int(sample[i][1]*5.6))
     return path
 
 def plot_path(path):
@@ -164,7 +167,6 @@ def plot_path(path):
         y_sum+=path[i+1]
         
     plt.plot(x,y,'bo-')
-    #plt.title("Human mouse movement from (0,0) to ("+str(path[0])+","+str(path[1])+")",fontsize=25)
     plt.xlim(-1920, 1920)
     plt.ylim(-1080, 1080)
     plt.ylabel("Y",fontsize=18)

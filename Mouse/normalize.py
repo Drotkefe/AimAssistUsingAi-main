@@ -17,7 +17,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # print(torch.rand(0,10,))
 
-#modell=torch.load("models\gan_models\model_200.pth")
+# modell=torch.load("models\gan_models\model_200.pth")
 
 
 
@@ -68,22 +68,23 @@ def apply_transform(x, scale_x,scale_y, rotate_angle):
 
 def get_path(sample):
     path=[]
-    for i in range(len(sample)):
-        path.append(int(sample[i][0]*6.65))
-        path.append(int(sample[i][1]*6.65))
+    for i in range(0,125,2):
+        path.append(int(sample[i][0]*10.65))
+        path.append(int(sample[i][1]*10.65))
     return path
 
 model = torch.jit.load('models\gan_models\lajos.pt')
 model.eval()
 
-with torch.no_grad():
-    s1=time.time()
-    generated_samples=model(torch.randn(16, 500).to(device=device))
-    print((time.time()-s1)/16)
-generated_samples = generated_samples.cpu().detach()
+np.random.seed(12)
 
-for i in range(32):
-    plot_path(get_path(generated_samples[i]))
+with torch.no_grad():
+    for i in range(10):
+        s1=time.time()
+        generated_samples=model(torch.randn(1, 100).to(device=device))
+        generated_samples = generated_samples.cpu().detach()
+        print((time.time()-s1))
+        plot_path(get_path(generated_samples[0]))
 
 
 # plot_path(apply_transform(data[1646],100/170,100/166,math.radians(180)))
