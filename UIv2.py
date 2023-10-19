@@ -14,7 +14,7 @@ window.title("Projectwork UI")
 #window.resizable(0,0)
 window.grid_columnconfigure(1, weight=2)
 
-ctk.CTkLabel(master=window,text="Chose your game:",font = ("Arial", 30)).grid(row=0,column=0, sticky="N", padx=200, pady=50)
+ctk.CTkLabel(master=window,text="Choose your game:",font = ("Arial", 30)).grid(row=0,column=0, sticky="N", padx=200, pady=50)
 frame=ctk.CTkFrame(master=window, width=800, height=70).grid(row=0,column=1, pady=20)
 
 
