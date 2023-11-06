@@ -40,9 +40,8 @@ def wind_mouse(start_x, start_y, dest_x, dest_y,distance,t, G_0=20, W_0=5, M_0=3
     '''
     current_x,current_y = start_x,start_y
     v_x = v_y = W_x = W_y = 0
-    global run
     step=0
-    while (dist:=np.hypot(dest_x-start_x,dest_y-start_y)) >= distance and step < 15:
+    while (dist:=np.hypot(dest_x-start_x,dest_y-start_y)) >= distance and step < 5:
         W_mag = min(W_0, dist)
         if dist >= D_0:
             W_x = W_x/sqrt3 + (2*np.random.random()-1)*W_mag/sqrt5
@@ -66,18 +65,10 @@ def wind_mouse(start_x, start_y, dest_x, dest_y,distance,t, G_0=20, W_0=5, M_0=3
         move_x = int(np.round(start_x))
         move_y = int(np.round(start_y))
         if current_x != move_x or current_y != move_y:
-            #This should wait for the mouse polling interval
-            #time.sleep(0.01)
-            run=True
             for i in range(t):
                 pass
-            #print(int(v_x),int(v_y))
-            #print(time.time()-start)
             win32api.mouse_event(0x0001,int(v_x),int(v_y))
-            #eger.move(int(v_x),int(v_y))
             step+=1
-        step+=1
-    run=False
 
 def mouse(rl,act_distance,body_multiplier,x,y,mouse_speed):
     if len(rl)>0:
@@ -86,7 +77,13 @@ def mouse(rl,act_distance,body_multiplier,x,y,mouse_speed):
             """ t1=create_thread(x/2,y/2,dest[0],dest[1],distance=2,t=0,G_0=20,W_0=5,M_0=12,D_0=15)
             t1.start() """
             wind_mouse(x/2,y/2,dest[0],dest[1],distance=3,t=int(5000),M_0=int(2*mouse_speed))
+            # a = Generate_gan_mouse_movement(dest[0]-x/2,dest[1]-y/2)
+            # i=0
+            # while dist:=np.hypot(dest[0]-x/2,dest[1]-y/2) >= 3 and i < 60:
+            #     win32api.mouse_event(0x0001,int(a[i]),int(a[i+1]))
+            #     i+=1
 
+                
 """ def create_thread(start_x, start_y, dest_x, dest_y,distance,t,G_0=20, W_0=5, M_0=12, D_0=15):
     return Thread(target=wind_mouse,args=(start_x,start_y,dest_x,dest_y,distance,t,G_0, W_0, M_0, D_0)) """
 
