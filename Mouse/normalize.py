@@ -29,6 +29,7 @@ def transform(data,new_x,new_y):
     for i in range(0,len(data),2):
         data[i]=int(data[i]*scalarx)
         data[i+1]=int(data[i+1]*scalary)
+    print(sum(data[::2]))
     return data
 
 def plot_path(path):
@@ -73,19 +74,28 @@ def get_path(sample):
         path.append(int(sample[i][1]*10.65))
     return path
 
-model = torch.jit.load('models\gan_models\lajos.pt')
+model = torch.jit.load('C:/Users/User/Desktop/AimAssistUsingAi-main/Mouse/models/gan_models/lajos.pt')
 model.eval()
 
-np.random.seed(12)
-
-with torch.no_grad():
-    for i in range(10):
-        s1=time.time()
-        generated_samples=model(torch.randn(1, 100).to(device=device))
+def Generate_gan_mouse_movement(new_x,new_y):
+    with torch.no_grad():
+        generated_samples = model(torch.randn(1, 100).to(device=device))
         generated_samples = generated_samples.cpu().detach()
-        print((time.time()-s1))
-        plot_path(get_path(generated_samples[0]))
+        return transform(get_path(generated_samples[0]),new_x,new_y)
 
+
+def main():
+    model = torch.jit.load('models\gan_models\lajos.pt')
+    model.eval()
+
+    with torch.no_grad():
+        np.random.seed(12)
+        for i in range(10):
+            s1=time.time()
+            generated_samples=model(torch.randn(1, 100).to(device=device))
+            generated_samples = generated_samples.cpu().detach()
+            print((time.time()-s1))
+            plot_path(get_path(generated_samples[0]))
 
 # plot_path(apply_transform(data[1646],100/170,100/166,math.radians(180)))
 
