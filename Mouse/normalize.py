@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 import time
+import win32api
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -29,7 +30,6 @@ def transform(data,new_x,new_y):
     for i in range(0,len(data),2):
         data[i]=int(data[i]*scalarx)
         data[i+1]=int(data[i+1]*scalary)
-    print(sum(data[::2]))
     return data
 
 def plot_path(path):
@@ -64,7 +64,6 @@ def apply_transform(x, scale_x,scale_y, rotate_angle):
         x[i+1]=x[i+1]* math.cos(rotate_angle) - x[i+1] * math.sin(rotate_angle)
         x[i]=x[i]*scale_x
         x[i+1]=x[i+1]*scale_y
-    print("idő:", time.time()-s1)
     return x
 
 def get_path(sample):
@@ -81,21 +80,19 @@ def Generate_gan_mouse_movement(new_x,new_y):
     with torch.no_grad():
         generated_samples = model(torch.randn(1, 100).to(device=device))
         generated_samples = generated_samples.cpu().detach()
-        return transform(get_path(generated_samples[0]),new_x,new_y)
-
+        path = transform(get_path(generated_samples[0]),new_x,new_y)
+        diff_x=new_x-sum(path[::2])
+        diff_y=new_y-sum(path[1::2])
+        return path,diff_x,diff_y 
 
 def main():
-    model = torch.jit.load('models\gan_models\lajos.pt')
-    model.eval()
-
-    with torch.no_grad():
-        np.random.seed(12)
-        for i in range(10):
-            s1=time.time()
-            generated_samples=model(torch.randn(1, 100).to(device=device))
-            generated_samples = generated_samples.cpu().detach()
-            print((time.time()-s1))
-            plot_path(get_path(generated_samples[0]))
-
+    a,x,y=Generate_gan_mouse_movement(500,0)
+    for i in range(0,len(a)-1,2):
+        print(a[i],a[i+1])
+        win32api.mouse_event(0x0001,a[i],a[i+1],0,0)
+        for k in range(50000):
+            pass
+    #win32api.mouse_event(0x0001,x,y,0,0)
 # plot_path(apply_transform(data[1646],100/170,100/166,math.radians(180)))
 
+#main()
