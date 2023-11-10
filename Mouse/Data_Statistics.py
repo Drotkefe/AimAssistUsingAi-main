@@ -1,5 +1,7 @@
-from csv_reader import data_trimmed,data
+from csv_reader import data_trimmed,data,lenghts
 import matplotlib.pyplot as plt
+import math
+import numpy as np
 
 
 def avg_lenght_of_one_path():
@@ -40,14 +42,14 @@ def plot_path(path):
         x_sum+=path[i]
         y_sum+=path[i+1]
         
-    plt.plot(x,y,'bo-')
+    plt.plot(x,y,'bo-',markersize=4)
     plt.title("Human mouse movement from (0,0) to ("+str(x_sum)+","+str(y_sum)+")",fontsize=25)
     plt.xlim(-1920, 1920)
     plt.ylim(-1080, 1080)
     plt.ylabel("Y",fontsize=18)
     plt.xlabel("X",fontsize=18)
-    plt.yticks(fontsize=14)
-    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=10)
+    plt.xticks(fontsize=10)
     plt.gca().invert_yaxis()
     plt.plot(x[0], y[0], 'or')
     plt.plot(x[-1], y[-1], 'or')
@@ -66,12 +68,43 @@ def longest_path():
             max=len(i)
     return max
 
+def get_lenghts(data):
+    lenghts=[]
+    for i in range(len(data)):
+        x=math.sqrt(data[i][0]**2+data[i][1]**2)
+        lenghts.append(int(x))
+    return lenghts
+
+def plot_distribution():
+    values,counts=np.unique(lenghts,return_counts=True)
+    
+def label_distribution():
+    Labels = []
+    for i in lenghts:
+        if i<=200:
+            Labels.append(0)
+        elif i>200 and i<=600:
+            Labels.append(1)
+        else:
+            Labels.append(2)
+
+    db_2=0
+    db_6=0
+    beyond=0
+    for i in range(0,len(lenghts)):
+        if lenghts[i]<=200:
+            db_2+=1
+        elif lenghts[i]>200 and lenghts[i]<=600:
+            db_6+=1
+        else:
+            beyond+=1
+    print("200-nál kisebb:",db_2,"\n200-600 között:",db_6,"\n600-on túl:    ",beyond)
+
 def main():
-    print("Minták száma",len(data_trimmed))
     print("Átlagos lépésszám hossz:",avg_lenght_of_one_path())
     print("Legnagyobb lépés:",max_step_size())
     print("Átlagos pixel mérték lépésenként:",avg_step_size())
-    print(longest_path())
+    label_distribution()
     #plot_path(data[get_index(-1322,-561)])
 
     for i in range(len(data)-1,len(data)-10,-1):

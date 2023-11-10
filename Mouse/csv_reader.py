@@ -144,20 +144,6 @@ for i in range(1324,2000):
             data[i].append(0)
 
 lenghts=get_lenghts(data)
-lenghts.sort()
-lenghts=np.round(lenghts)
-
-db_2=0
-db_6=0
-beyond=0
-for i in range(0,len(lenghts)):
-    if lenghts[i]<=200:
-        db_2+=1
-    elif lenghts[i]>200 and lenghts[i]<=600:
-        db_6+=1
-    else:
-        beyond+=1
-print("200-nál kisebb:",db_2,"\n200-600 között:",db_6,"\n600-on túl:    ",beyond)
 
 remove_label(data)
 a=np.array(data)

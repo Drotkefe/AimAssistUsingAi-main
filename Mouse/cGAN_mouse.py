@@ -1,13 +1,7 @@
 import torch
 import torch.nn as nn
-import pandas as pd
 import numpy as np
-from torchvision import transforms
-from torch.utils.data import Dataset, DataLoader
-from PIL import Image
-from torch import autograd
 from torch.autograd import Variable
-from torchvision.utils import make_grid
 import matplotlib.pyplot as plt
 import csv_reader
 
@@ -15,11 +9,11 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print('device:', device)
 
 X=csv_reader.numpy_X  
-Y=csv_reader.numpy_Y
+Y=csv_reader.Labels
 
 def get_unique_labels(y):
-    unique_data = [list(x) for x in set(tuple(x) for x in Y)]
-    return len(unique_data)
+    unique_data = np.array(y)
+    return len(np.unique(unique_data))
 
 class_numbers=get_unique_labels(Y)
 
@@ -31,19 +25,19 @@ class Discriminator(nn.Module):
         self.model = nn.Sequential(
             nn.Linear(999*2+class_numbers, 2048),
             nn.LeakyReLU(0.2,inplace=True),
-            nn.Dropout(0.3),
+            nn.Dropout(0.5),
             nn.Linear(2048, 1024),
             nn.LeakyReLU(0.2,inplace=True),
-            nn.Dropout(0.3),
+            nn.Dropout(0.4),
             nn.Linear(1024, 512),
             nn.LeakyReLU(0.2,inplace=True),
             nn.Dropout(0.3),
             nn.Linear(512, 256),
             nn.LeakyReLU(0.2,inplace=True),
-            nn.Dropout(0.3),
+            nn.Dropout(0.2),
             nn.Linear(256, 128),
             nn.LeakyReLU(0.2,inplace=True),
-            nn.Dropout(0.3),
+            nn.Dropout(0.1),
             nn.Linear(128, 1),
             nn.Sigmoid(),
         )
@@ -55,7 +49,7 @@ class Discriminator(nn.Module):
         output = self.model(x)
         return output.squeeze()
 
-z_size=200
+z_size=100
 
 class Generator(nn.Module):
     def __init__(self):
@@ -75,16 +69,15 @@ class Generator(nn.Module):
     def forward(self, z, labels):
         z=z.view(-1,z_size)
         c=self.label_emb(labels)
-        z=torch.cat([z,labels],1)
-        out = self.model(z)
+        x=torch.cat([z,c],1)
+        out = self.model(x)
         return out.view(-1,999*2)
 
 
 batch_size = 128  # Batch size
-epochs = 300  # Train epochs
+epochs = 50  # Train epochs
 learning_rate = 0.0001
-num_epochs = 300
-loss_function = nn.BCELoss()
+criterion = nn.BCELoss()
 
 dataset=[(X[i], Y[i]) for i in range(X.shape[0])]
 data_loader=torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=False)
@@ -92,9 +85,38 @@ data_loader=torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=
 generator=Generator().to(device)
 discriminator=Discriminator().to(device)
 
-
 g_optimizer = torch.optim.Adam(generator.parameters(), lr=learning_rate)
 d_optimizer = torch.optim.Adam(discriminator.parameters(), lr=learning_rate)
+
+def get_path(sample):
+    path=[]
+    for i in range(0,len(sample[0])-750,2):
+        path.append(int(sample[0][i]*11.2))
+        path.append(int(sample[0][i+1]*11.2))
+    return path
+
+def plot_path(path):
+    x=[]
+    y=[]
+    x_sum=0
+    y_sum=0
+    for i in range(0,len(path)-1,2):
+        x.append(x_sum)
+        y.append(y_sum)
+        x_sum+=path[i]
+        y_sum+=path[i+1]
+        
+    plt.plot(x,y,'bo-')
+    plt.xlim(-1920, 1920)
+    plt.ylim(-1080, 1080)
+    plt.ylabel("Y",fontsize=18)
+    plt.xlabel("X",fontsize=18)
+    plt.yticks(fontsize=14)
+    plt.xticks(fontsize=14)
+    plt.gca().invert_yaxis()
+    plt.plot(x[0], y[0], 'or')
+    plt.plot(x[-1], y[-1], 'or')
+    plt.show()
 
 def generator_train_step(batch_size, discriminator, generator, g_optimizer, criterion):
     
@@ -105,7 +127,7 @@ def generator_train_step(batch_size, discriminator, generator, g_optimizer, crit
     z = Variable(torch.randn(batch_size, z_size)).to(device)
     
     # Building fake labels
-    fake_labels = Variable(torch.LongTensor(np.random.randint(0, 1920, batch_size))).to(device)
+    fake_labels = Variable(torch.LongTensor(np.random.randint(0, class_numbers, batch_size))).to(device)
     
     # Generating fake data
     fake_data = generator(z, fake_labels)
@@ -136,10 +158,10 @@ def discriminator_train_step(batch_size, discriminator, generator, d_optimizer, 
     real_loss = criterion(real_validity, Variable(torch.ones(batch_size)).to(device))
     
     # Building z
-    z = Variable(torch.randn(batch_size, 200)).to(device)
+    z = Variable(torch.randn(batch_size, z_size)).to(device)
     
     # Building fake labels
-    fake_labels = Variable(torch.LongTensor(np.random.randint(0, 1920, batch_size))).to(device)
+    fake_labels = Variable(torch.LongTensor(np.random.randint(0, class_numbers, batch_size))).to(device)
     
     # Generating fake data
     fake_data = generator(z, fake_labels)
@@ -162,37 +184,23 @@ def discriminator_train_step(batch_size, discriminator, generator, d_optimizer, 
     return d_loss.data
 
 for epoch in range(epochs):
-    
     print('Starting epoch {}...'.format(epoch+1))
-    
     for i,(data, labels) in enumerate(data_loader):
-        
-        # Train data
         real_data = Variable(data).to(device)
-        labels = Variable(labels[i]).to(device)
-        
-        # Set generator train
+        labels = Variable(labels).to(device)
         generator.train()
-        
-        # Train discriminator
         d_loss = discriminator_train_step(len(real_data), discriminator,
-                                          generator, d_optimizer, loss_function,
-                                          real_data, labels)
-        
-        # Train generator
-        g_loss = generator_train_step(batch_size, discriminator, generator, g_optimizer, loss_function)
-    
-    # Set generator eval
+                                          generator, d_optimizer, criterion,
+                                          real_data, labels) 
+        g_loss = generator_train_step(batch_size, discriminator, generator, g_optimizer, criterion)
     generator.eval()
-    
     print('g_loss: {}, d_loss: {}'.format(g_loss, d_loss))
-    
-    # Building z 
-    z = Variable(torch.randn(1920, 200)).to(device)
-    
-    # Labels 0 ~ 8
-    labels = Variable(torch.LongTensor(np.arange(1920))).to(device)
-    
+    z = Variable(torch.randn(class_numbers, z_size)).to(device)
+    labels = Variable(torch.LongTensor(np.arange(class_numbers))).to(device)
     # Generating data
     sample_data = generator(z, labels).unsqueeze(1).data.cpu()
-    
+    if (epoch+1)%10==0:
+        path=get_path(sample_data[1])
+        plot_path(path)
+
+
