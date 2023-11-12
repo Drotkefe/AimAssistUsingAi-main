@@ -7,21 +7,6 @@ import win32api
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-# data=csv_reader.numpy_X
-
-# t = torch.tensor(data,dtype=torch.float32)
-# print("Tensor:", t[0][:50])
-# t1=normalize(t,2.0,0)
-
-# print(t1[0][:50])
-
-
-# print(torch.rand(0,10,))
-
-# modell=torch.load("models\gan_models\model_200.pth")
-
-
-
 def transform(data,new_x,new_y):
     sum_x=sum(data[::2])
     sum_y=sum(data[1::2])
@@ -32,7 +17,7 @@ def transform(data,new_x,new_y):
         data[i+1]=int(data[i+1]*scalary)
     return data
 
-def plot_path(path):
+def plot_path(path,diffx,diffy):
     x=[]
     y=[]
     x_sum=0
@@ -43,8 +28,8 @@ def plot_path(path):
         x_sum+=path[i]
         y_sum+=path[i+1]
         
-    plt.plot(x,y,'bo-')
-    plt.title("Human mouse movement from (0,0) to ("+str(x_sum)+","+str(y_sum)+")",fontsize=25)
+    plt.plot(x,y,'bo-',markersize=4)
+    plt.title("GAN generated mouse movement from (0,0) to ("+str(x_sum+diffx)+","+str(y_sum+diffy)+")",fontsize=25)
     plt.xlim(-1920, 1920)
     plt.ylim(-1080, 1080)
     plt.ylabel("Y",fontsize=18)
@@ -52,9 +37,9 @@ def plot_path(path):
     plt.yticks(fontsize=14)
     plt.xticks(fontsize=14)
     plt.gca().invert_yaxis()
-    plt.plot(x[0], y[0], 'or', markersize=12)
-    plt.plot(x[-1], y[-1], 'or', markersize=12)
-    plt.autoscale(True,'both',True)
+    plt.plot(x[0], y[0], 'or', markersize=9)
+    plt.plot(x[-1], y[-1], 'or', markersize=9)
+    #plt.autoscale(True,'both',True)
     plt.show()
 
 def apply_transform(x, scale_x,scale_y, rotate_angle):
@@ -85,13 +70,18 @@ def Generate_gan_mouse_movement(new_x,new_y):
         diff_y=new_y-sum(path[1::2])
         return path,diff_x,diff_y 
 
-def main():
-    a,x,y=Generate_gan_mouse_movement(500,0)
+def Test_Move(a):
     for i in range(0,len(a)-1,2):
-        print(a[i],a[i+1])
         win32api.mouse_event(0x0001,a[i],a[i+1],0,0)
         for k in range(50000):
             pass
+
+if __name__ == "__main__":
+    path,x,y=Generate_gan_mouse_movement(10,900)
+    plot_path(path,x,y)
+    Test_Move(path)
+    
+
     #win32api.mouse_event(0x0001,x,y,0,0)
 # plot_path(apply_transform(data[1646],100/170,100/166,math.radians(180)))
 
