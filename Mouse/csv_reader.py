@@ -129,6 +129,17 @@ def get_lenghts(data):
         lenghts.append(x)
     return lenghts
 
+def indexes_for_labels(lenghts):
+    Labels = []
+    for i in lenghts:
+        if i<=200:
+            Labels.append(0)
+        elif i>200 and i<=600:
+            Labels.append(1)
+        else:
+            Labels.append(2)
+    return Labels
+
 s=time.time()
 data_df=pd.read_csv('data/trajectory_file.csv')
 array=make_array_from_data(data_df)
@@ -144,11 +155,11 @@ for i in range(1324,2000):
             data[i].append(0)
 
 lenghts=get_lenghts(data)
+Labels=indexes_for_labels(lenghts)
 
 remove_label(data)
 a=np.array(data)
 a=np.array(a.reshape(len(data),999,2))
-
 
 numpy_X=a
 
