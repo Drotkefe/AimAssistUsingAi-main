@@ -147,7 +147,7 @@ data=create_data(array)
 print("Eltelt idő: {} mp az adatok beolvasásával".format(round(time.time()-s,2)))
 
 numpy_Y=get_numpy_labels(data)
-print("Cimkék:",numpy_Y.shape)
+#print("Cimkék:",numpy_Y.shape)
 
 for i in range(1324,2000):
     if len(data[i])!=2000:
@@ -160,7 +160,10 @@ Labels=indexes_for_labels(lenghts)
 remove_label(data)
 a=np.array(data)
 a=np.array(a.reshape(len(data),999,2))
-
+b=a.copy()
+for i in range(10):
+    a=np.concatenate((a,b),axis=0)
+print("Minták:",a.shape)
 numpy_X=a
 
 data_array=final_array_array(data)

@@ -64,9 +64,9 @@ class Generator(nn.Module):
 generator = Generator().to(device=device)
 
 lr = 0.0001
-num_epochs = 15
+num_epochs = 20
 loss_function = nn.BCELoss()
-batch_size = 32
+batch_size = 128
 
 optimizer_discriminator = torch.optim.Adam(discriminator.parameters(), lr=lr/10)
 optimizer_generator = torch.optim.Adam(generator.parameters(), lr=lr)
@@ -143,16 +143,21 @@ latent_space_samples = torch.randn(batch_size, z_size).to(device=device)
 generated_samples = generator(latent_space_samples)
 #torch.save(generator,"models\gan_models\model.pth")
 model_scripted = torch.jit.script(generator)
-model_scripted.save('models\gan_models\lajos.pt') 
+model_scripted.save('models\gan_models\lajos2.pt') 
 
 
 generated_samples = generated_samples.cpu().detach()
 
 def get_path(sample):
     path=[]
-    for i in range(0,150):
-        path.append(int(sample[i][0]*5.6))
-        path.append(int(sample[i][1]*5.6))
+    for i in range(0,222,3):
+        x=0
+        y=0
+        for j in range(0,4,1):
+            x+=int(sample[i+j][0]*5.6)
+            y+=int(sample[i+j][1]*5.6)
+        path.append(x)
+        path.append(y)
     return path
 
 def plot_path(path):
@@ -166,7 +171,7 @@ def plot_path(path):
         x_sum+=path[i]
         y_sum+=path[i+1]
         
-    plt.plot(x,y,'bo-')
+    plt.plot(x,y,'bo-',markersize=5)
     plt.xlim(-1920, 1920)
     plt.ylim(-1080, 1080)
     plt.ylabel("Y",fontsize=18)
@@ -179,7 +184,7 @@ def plot_path(path):
     plt.show()
 
 print(generated_samples[0])
-for i in range(len(generated_samples)):
+for i in range(len(generated_samples)-1):
     path=get_path(generated_samples[0])    
-    path=get_path(generated_samples[5])    
+    path=get_path(generated_samples[i+1])    
     plot_path(path)

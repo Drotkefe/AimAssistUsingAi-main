@@ -101,7 +101,7 @@ def label_distribution():
     print("200-nál kisebb:",db_2,"\n200-600 között:",db_6,"\n600-on túl:    ",beyond)
 
 def main():
-    print("Átlagos lépésszám hossz:",avg_lenght_of_one_path())
+    #print("Átlagos lépésszám hossz:",avg_lenght_of_one_path())
     print("Legnagyobb lépés:",max_step_size())
     print("Átlagos pixel mérték lépésenként:",avg_step_size())
     label_distribution()
