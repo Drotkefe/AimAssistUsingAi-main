@@ -60,6 +60,49 @@ class Generator(nn.Module):
         output = self.model(x)
         output = output.view(x.size(0), 999, 2)
         return output
+    
+def plot_metrics(discriminator_loss,generator_loss):
+    x=[i for i in range(1,len(dmetrics_loss)+1)]
+    plt.plot(x,discriminator_loss,'r')
+    plt.plot(x,generator_loss,'b')
+    plt.xlabel('Training iteration')
+    plt.ylabel('Loss')
+    plt.show()
+
+def get_path(sample):
+    path=[]
+    for i in range(0,222,3):
+        x=0
+        y=0
+        for j in range(0,4,1):
+            x+=int(sample[i+j][0]*5.6)
+            y+=int(sample[i+j][1]*5.6)
+        path.append(x)
+        path.append(y)
+    return path
+
+def plot_path(path):
+    x=[]
+    y=[]
+    x_sum=0
+    y_sum=0
+    for i in range(0,len(path)-1,2):
+        x.append(x_sum)
+        y.append(y_sum)
+        x_sum+=path[i]
+        y_sum+=path[i+1]
+        
+    plt.plot(x,y,'bo-',markersize=5)
+    plt.xlim(-1920, 1920)
+    plt.ylim(-1080, 1080)
+    plt.ylabel("Y",fontsize=18)
+    plt.xlabel("X",fontsize=18)
+    plt.yticks(fontsize=14)
+    plt.xticks(fontsize=14)
+    plt.gca().invert_yaxis()
+    plt.plot(x[0], y[0], 'or')
+    plt.plot(x[-1], y[-1], 'or')
+    plt.show()    
 
 generator = Generator().to(device=device)
 
@@ -68,7 +111,7 @@ num_epochs = 20
 loss_function = nn.BCELoss()
 batch_size = 128
 
-optimizer_discriminator = torch.optim.Adam(discriminator.parameters(), lr=lr/10)
+optimizer_discriminator = torch.optim.Adam(discriminator.parameters(), lr=lr/100)
 optimizer_generator = torch.optim.Adam(generator.parameters(), lr=lr)
 
 
@@ -127,64 +170,30 @@ for epoch in range(num_epochs):
         if n==batch_size-1:
             print(f"Epoch: {epoch} Loss D.: {loss_discriminator}")
             print(f"Epoch: {epoch} Loss G.: {loss_generator}")
+            plot_metrics(dmetrics_loss,gmetrics_loss)
+            generated_samples=generated_samples.cpu().detach()   
+            path=get_path(generated_samples[0])    
+            plot_path(path)
+            a=input("Stop? y/n: ")
+            if a=='y':
+                break
             
 
-def plot_metrics():
-    x=[i for i in range(1,len(dmetrics_loss)+1)]
-    plt.plot(x,dmetrics_loss,'r')
-    plt.plot(x,gmetrics_loss,'b')
-    plt.xlabel('Training iteration')
-    plt.ylabel('Loss')
-    plt.show()
 
-plot_metrics()
+
+#plot_metrics(dmetrics_loss,gmetrics_loss)
 
 latent_space_samples = torch.randn(batch_size, z_size).to(device=device)
 generated_samples = generator(latent_space_samples)
 #torch.save(generator,"models\gan_models\model.pth")
 model_scripted = torch.jit.script(generator)
-model_scripted.save('models\gan_models\lajos2.pt') 
+model_scripted.save('models\gan_models\lajos3.pt') 
 
 
 generated_samples = generated_samples.cpu().detach()
 
-def get_path(sample):
-    path=[]
-    for i in range(0,222,3):
-        x=0
-        y=0
-        for j in range(0,4,1):
-            x+=int(sample[i+j][0]*5.6)
-            y+=int(sample[i+j][1]*5.6)
-        path.append(x)
-        path.append(y)
-    return path
-
-def plot_path(path):
-    x=[]
-    y=[]
-    x_sum=0
-    y_sum=0
-    for i in range(0,len(path)-1,2):
-        x.append(x_sum)
-        y.append(y_sum)
-        x_sum+=path[i]
-        y_sum+=path[i+1]
-        
-    plt.plot(x,y,'bo-',markersize=5)
-    plt.xlim(-1920, 1920)
-    plt.ylim(-1080, 1080)
-    plt.ylabel("Y",fontsize=18)
-    plt.xlabel("X",fontsize=18)
-    plt.yticks(fontsize=14)
-    plt.xticks(fontsize=14)
-    plt.gca().invert_yaxis()
-    plt.plot(x[0], y[0], 'or')
-    plt.plot(x[-1], y[-1], 'or')
-    plt.show()
 
 print(generated_samples[0])
-for i in range(len(generated_samples)-1):
-    path=get_path(generated_samples[0])    
-    path=get_path(generated_samples[i+1])    
+for i in range(len(generated_samples)):    
+    path=get_path(generated_samples[i])    
     plot_path(path)
