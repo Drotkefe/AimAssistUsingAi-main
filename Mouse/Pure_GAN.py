@@ -41,7 +41,7 @@ class Discriminator(nn.Module):
 
 discriminator = Discriminator().to(device=device)
 
-z_size=100
+z_size=500
 class Generator(nn.Module):
     def __init__(self):
         super().__init__()
@@ -107,12 +107,12 @@ def plot_path(path):
 generator = Generator().to(device=device)
 
 lr = 0.0001
-num_epochs = 20
+num_epochs = 50
 loss_function = nn.BCELoss()
-batch_size = 128
+batch_size = 256
 
-optimizer_discriminator = torch.optim.Adam(discriminator.parameters(), lr=lr/100)
-optimizer_generator = torch.optim.Adam(generator.parameters(), lr=lr)
+optimizer_discriminator = torch.optim.Adam(discriminator.parameters(), lr=lr)
+optimizer_generator = torch.optim.Adam(generator.parameters(), lr=lr/10)
 
 
 data_loader=torch.utils.data.DataLoader(X, batch_size=batch_size, shuffle=False)
@@ -170,13 +170,13 @@ for epoch in range(num_epochs):
         if n==batch_size-1:
             print(f"Epoch: {epoch} Loss D.: {loss_discriminator}")
             print(f"Epoch: {epoch} Loss G.: {loss_generator}")
-            plot_metrics(dmetrics_loss,gmetrics_loss)
-            generated_samples=generated_samples.cpu().detach()   
-            path=get_path(generated_samples[0])    
-            plot_path(path)
-            a=input("Stop? y/n: ")
-            if a=='y':
-                break
+            # plot_metrics(dmetrics_loss,gmetrics_loss)
+            # generated_samples=generated_samples.cpu().detach()   
+            # path=get_path(generated_samples[0])    
+            # plot_path(path)
+            # a=input("Stop? y/n: ")
+            # if a=='y':
+            #     break
             
 
 
@@ -187,7 +187,7 @@ latent_space_samples = torch.randn(batch_size, z_size).to(device=device)
 generated_samples = generator(latent_space_samples)
 #torch.save(generator,"models\gan_models\model.pth")
 model_scripted = torch.jit.script(generator)
-model_scripted.save('models\gan_models\lajos3.pt') 
+model_scripted.save('models\gan_models\lajos4.pt') 
 
 
 generated_samples = generated_samples.cpu().detach()
