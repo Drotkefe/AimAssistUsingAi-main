@@ -23,21 +23,26 @@ class Discriminator(nn.Module):
         self.label_emb = nn.Embedding(class_numbers, class_numbers)
 
         self.model = nn.Sequential(
-            nn.Linear(999*2+class_numbers, 2048),
-            nn.LeakyReLU(0.2,inplace=True),
-            nn.Dropout(0.5),
-            nn.Linear(2048, 1024),
-            nn.LeakyReLU(0.2,inplace=True),
-            nn.Dropout(0.4),
-            nn.Linear(1024, 512),
-            nn.LeakyReLU(0.2,inplace=True),
-            nn.Dropout(0.3),
-            nn.Linear(512, 256),
-            nn.LeakyReLU(0.2,inplace=True),
+            nn.Linear(999*2+class_numbers, 1500),
+            nn.LeakyReLU(inplace=True),
             nn.Dropout(0.2),
-            nn.Linear(256, 128),
-            nn.LeakyReLU(0.2,inplace=True),
+            nn.Linear(1500, 1280),
+            nn.LeakyReLU(inplace=True),
+            nn.Dropout(0.2),
+            nn.Linear(1280, 1000),
+            nn.LeakyReLU(inplace=True),
             nn.Dropout(0.1),
+            nn.Linear(1000, 784),
+            nn.LeakyReLU(inplace=True),
+            nn.Dropout(0.1),
+            nn.Linear(784, 516),
+            nn.LeakyReLU(inplace=True),
+            nn.Dropout(0.1),
+            nn.Linear(516, 320),
+            nn.LeakyReLU(inplace=True),
+            nn.Dropout(0.1),
+            nn.Linear(320, 128),
+            nn.LeakyReLU(inplace=True),
             nn.Linear(128, 1),
             nn.Sigmoid(),
         )
@@ -56,13 +61,13 @@ class Generator(nn.Module):
         super().__init__()
         self.label_emb = nn.Embedding(class_numbers,class_numbers)
         self.model = nn.Sequential(
-            nn.Linear(z_size+class_numbers, 512),
-            nn.LeakyReLU(0.2,inplace=True),
+            nn.Linear(z_size+class_numbers, 256),
+            nn.LeakyReLU(inplace=True),
+            nn.Linear(256, 512),
+            nn.LeakyReLU(inplace=True),
             nn.Linear(512, 1024),
-            nn.LeakyReLU(0.2,inplace=True),
-            nn.Linear(1024, 2048),
-            nn.LeakyReLU(0.2,inplace=True),
-            nn.Linear(2048, 999*2),
+            nn.LeakyReLU(inplace=True),
+            nn.Linear(1024, 999*2),
             nn.Tanh()
         )
 
@@ -74,8 +79,8 @@ class Generator(nn.Module):
         return out.view(-1,999*2)
 
 
-batch_size = 128  # Batch size
-epochs = 50  # Train epochs
+batch_size = 256  # Batch size
+epochs = 20  # Train epochs
 learning_rate = 0.0001
 criterion = nn.BCELoss()
 
@@ -85,14 +90,19 @@ data_loader=torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=
 generator=Generator().to(device)
 discriminator=Discriminator().to(device)
 
-g_optimizer = torch.optim.Adam(generator.parameters(), lr=learning_rate)
+g_optimizer = torch.optim.Adam(generator.parameters(), lr=learning_rate/10)
 d_optimizer = torch.optim.Adam(discriminator.parameters(), lr=learning_rate)
 
 def get_path(sample):
     path=[]
-    for i in range(0,len(sample[0])-750,2):
-        path.append(int(sample[0][i]*11.2))
-        path.append(int(sample[0][i+1]*11.2))
+    for i in range(0,222,3):
+        x=0
+        y=0
+        for j in range(0,4,1):
+            x+=int(sample[0][i+j]*5.6)
+            y+=int(sample[0][i+j+1]*5.6)
+        path.append(x)
+        path.append(y)
     return path
 
 def plot_path(path):
@@ -200,7 +210,14 @@ for epoch in range(epochs):
     # Generating data
     sample_data = generator(z, labels).unsqueeze(1).data.cpu()
     if (epoch+1)%10==0:
-        path=get_path(sample_data[1])
-        plot_path(path)
+        # path=get_path(sample_data[1])
+        # plot_path(path)
+        print()
 
-
+z = Variable(torch.randn(class_numbers, z_size)).to(device)
+labels = Variable(torch.LongTensor(np.arange(class_numbers))).to(device)
+# Generating data
+sample_data = generator(z, labels).unsqueeze(1).data.cpu()
+for i in range(0,3):
+    path=get_path(sample_data[i])
+    plot_path(path)

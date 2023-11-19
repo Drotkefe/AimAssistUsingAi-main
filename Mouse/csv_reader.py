@@ -161,8 +161,10 @@ remove_label(data)
 a=np.array(data)
 a=np.array(a.reshape(len(data),999,2))
 b=a.copy()
+c=Labels.copy()
 for i in range(10):
     a=np.concatenate((a,b),axis=0)
+    Labels=np.concatenate((Labels,c),axis=0)
 print("Minták:",a.shape)
 numpy_X=a
 

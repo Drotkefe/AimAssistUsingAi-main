@@ -18,18 +18,26 @@ class Discriminator(nn.Module):
     def __init__(self):
         super().__init__()
         self.model = nn.Sequential(
-            nn.Linear(2*999, 1028),
+            nn.Linear(2*999, 1500),
             nn.LeakyReLU(),
             nn.Dropout(0.2),
-            nn.Linear(1028, 516),
+            nn.Linear(1500, 1280),
             nn.LeakyReLU(),
             nn.Dropout(0.2),
-            nn.Linear(516, 256),
+            nn.Linear(1280, 1000),
             nn.LeakyReLU(),
             nn.Dropout(0.1),
-            nn.Linear(256, 128),
+            nn.Linear(1000, 784),
             nn.LeakyReLU(),
             nn.Dropout(0.1),
+            nn.Linear(784, 516),
+            nn.LeakyReLU(),
+            nn.Dropout(0.1),
+            nn.Linear(516, 320),
+            nn.LeakyReLU(),
+            nn.Dropout(0.1),
+            nn.Linear(320, 128),
+            nn.LeakyReLU(),
             nn.Linear(128, 1),
             nn.Sigmoid(),
         )
@@ -41,7 +49,7 @@ class Discriminator(nn.Module):
 
 discriminator = Discriminator().to(device=device)
 
-z_size=500
+z_size=100
 class Generator(nn.Module):
     def __init__(self):
         super().__init__()
@@ -107,7 +115,7 @@ def plot_path(path):
 generator = Generator().to(device=device)
 
 lr = 0.0001
-num_epochs = 50
+num_epochs = 20
 loss_function = nn.BCELoss()
 batch_size = 256
 
@@ -187,7 +195,7 @@ latent_space_samples = torch.randn(batch_size, z_size).to(device=device)
 generated_samples = generator(latent_space_samples)
 #torch.save(generator,"models\gan_models\model.pth")
 model_scripted = torch.jit.script(generator)
-model_scripted.save('models\gan_models\lajos4.pt') 
+model_scripted.save('models\gan_models\lajos5.pt') 
 
 
 generated_samples = generated_samples.cpu().detach()
