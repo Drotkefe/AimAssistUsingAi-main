@@ -18,27 +18,12 @@ class Discriminator(nn.Module):
     def __init__(self):
         super().__init__()
         self.model = nn.Sequential(
-            nn.Linear(2*999, 1500),
+            nn.Linear(2*999, 999),
             nn.LeakyReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(1500, 1280),
+            nn.Dropout(0.3),
+            nn.Linear(999, 256),
             nn.LeakyReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(1280, 1000),
-            nn.LeakyReLU(),
-            nn.Dropout(0.1),
-            nn.Linear(1000, 784),
-            nn.LeakyReLU(),
-            nn.Dropout(0.1),
-            nn.Linear(784, 516),
-            nn.LeakyReLU(),
-            nn.Dropout(0.1),
-            nn.Linear(516, 320),
-            nn.LeakyReLU(),
-            nn.Dropout(0.1),
-            nn.Linear(320, 128),
-            nn.LeakyReLU(),
-            nn.Linear(128, 1),
+            nn.Linear(256, 1),
             nn.Sigmoid(),
         )
 
@@ -49,17 +34,20 @@ class Discriminator(nn.Module):
 
 discriminator = Discriminator().to(device=device)
 
-z_size=100
+z_size=300
 class Generator(nn.Module):
     def __init__(self):
         super().__init__()
         self.model = nn.Sequential(
-            nn.Linear(z_size, 256),
+            nn.Linear(z_size, 300),
             nn.ReLU(),
-            nn.Linear(256, 512),
+            nn.Linear(300, 450),
+            nn.ReLU(),
+            nn.Linear(450, 512),
             nn.ReLU(),
             nn.Linear(512, 1024),
             nn.ReLU(),
+            nn.BatchNorm1d(1024),
             nn.Linear(1024, 2*999),
             nn.Tanh(),
         )
@@ -115,9 +103,9 @@ def plot_path(path):
 generator = Generator().to(device=device)
 
 lr = 0.0001
-num_epochs = 20
+num_epochs = 50
 loss_function = nn.BCELoss()
-batch_size = 256
+batch_size = 512
 
 optimizer_discriminator = torch.optim.Adam(discriminator.parameters(), lr=lr)
 optimizer_generator = torch.optim.Adam(generator.parameters(), lr=lr/10)
@@ -175,9 +163,8 @@ for epoch in range(num_epochs):
         dmetrics_loss.append(loss_discriminator.cpu().detach())
         gmetrics_loss.append(loss_generator.cpu().detach())
 
-        if n==batch_size-1:
-            print(f"Epoch: {epoch} Loss D.: {loss_discriminator}")
-            print(f"Epoch: {epoch} Loss G.: {loss_generator}")
+    print(f"Epoch: {epoch} Loss D.: {loss_discriminator}")
+    print(f"Epoch: {epoch} Loss G.: {loss_generator}")
             # plot_metrics(dmetrics_loss,gmetrics_loss)
             # generated_samples=generated_samples.cpu().detach()   
             # path=get_path(generated_samples[0])    
@@ -195,7 +182,7 @@ latent_space_samples = torch.randn(batch_size, z_size).to(device=device)
 generated_samples = generator(latent_space_samples)
 #torch.save(generator,"models\gan_models\model.pth")
 model_scripted = torch.jit.script(generator)
-model_scripted.save('models\gan_models\lajos5.pt') 
+model_scripted.save('models\gan_models\proba2.pt') 
 
 
 generated_samples = generated_samples.cpu().detach()

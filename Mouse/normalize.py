@@ -58,13 +58,15 @@ def get_path(sample):
         path.append(int(sample[i][1]*10.65))
     return path
 
-model = torch.jit.load('C:/Users/User/Desktop/AimAssistUsingAi-main/Mouse/models/gan_models/lajos.pt')
+#god_mode2 uses noise dim of 300 otherwise 100
+model = torch.jit.load('C:/Users/Patrik/Desktop/Projekt/AimAssistUsingAi-main/AimAssistUsingAi-main/Mouse/models/gan_models/god_mode2.pt')
 model.eval()
 
 def Generate_gan_mouse_movement(new_x,new_y):
     with torch.no_grad():
-        generated_samples = model(torch.randn(1, 100).to(device=device))
+        generated_samples = model(torch.randn(1, 300).to(device=device))
         generated_samples = generated_samples.cpu().detach()
+        plot_path(get_path(generated_samples[0]),0,0)
         path = transform(get_path(generated_samples[0]),new_x,new_y)
         diff_x=new_x-sum(path[::2])
         diff_y=new_y-sum(path[1::2])
@@ -76,10 +78,28 @@ def Test_Move(a):
         for k in range(50000):
             pass
 
+def produce_path_for_pure_results(sample):
+    path=[]
+    for i in range(0,222,3):
+        x=0
+        y=0
+        for j in range(0,4,1):
+            x+=int(sample[i+j][0]*5.6)
+            y+=int(sample[i+j][1]*5.6)
+        path.append(x)
+        path.append(y)
+    return path
+
 if __name__ == "__main__":
-    path,x,y=Generate_gan_mouse_movement(10,900)
-    plot_path(path,x,y)
-    Test_Move(path)
+    with torch.no_grad():
+        generated_samples = model(torch.randn(20, 300).to(device=device))
+        generated_samples = generated_samples.cpu().detach()
+        for i in range(len(generated_samples)):    
+            path=produce_path_for_pure_results(generated_samples[i])    
+            plot_path(path,0,0)
+    #path,x,y=Generate_gan_mouse_movement(500,900)
+    #plot_path(path,x,y)
+    #Test_Move(path)
     
 
     #win32api.mouse_event(0x0001,x,y,0,0)
