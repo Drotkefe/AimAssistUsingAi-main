@@ -3,6 +3,7 @@ import torch.nn as nn
 import csv_reader
 import matplotlib.pyplot as plt
 import numpy as np
+from torchsummary import summary
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -12,6 +13,7 @@ print('device:', device)
 X=csv_reader.numpy_X
 
 np.random.seed(12)
+torch.manual_seed(10)
 
 
 class Discriminator(nn.Module):
@@ -33,8 +35,8 @@ class Discriminator(nn.Module):
         return output
 
 discriminator = Discriminator().to(device=device)
-
-z_size=300
+summary(discriminator,input_size=(999,2),batch_size=512)
+z_size=500
 class Generator(nn.Module):
     def __init__(self):
         super().__init__()
@@ -101,6 +103,7 @@ def plot_path(path):
     plt.show()    
 
 generator = Generator().to(device=device)
+#summary(generator,(1024,z_size),batch_size=512)
 
 lr = 0.0001
 num_epochs = 50
