@@ -6,6 +6,7 @@ import time
 import win32api
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+torch.manual_seed(10)
 
 def transform(data,new_x,new_y):
     sum_x=sum(data[::2])
@@ -42,6 +43,30 @@ def plot_path(path,diffx,diffy):
     #plt.autoscale(True,'both',True)
     plt.show()
 
+def multiple_path_to_plot(paths):
+    for path in paths:
+        x=[]
+        y=[]
+        x_sum=0
+        y_sum=0
+        for i in range(0,len(path)-1,2):
+            x.append(x_sum)
+            y.append(y_sum)
+            x_sum+=path[i]
+            y_sum+=path[i+1]
+        plt.plot(x,y,'bo-',markersize=4)
+        #plt.plot(x[0], y[0], 'or', markersize=7)
+        plt.plot(x[-1], y[-1], 'or', markersize=7)
+    plt.xlim(-1920, 1920)
+    plt.ylim(-1080, 1080)
+    plt.ylabel("Y",fontsize=18)
+    plt.xlabel("X",fontsize=18)
+    plt.yticks(fontsize=14)
+    plt.xticks(fontsize=14)
+    plt.gca().invert_yaxis()
+    plt.show()
+    
+
 def apply_transform(x, scale_x,scale_y, rotate_angle):
     s1=time.time()
     for i in range(0,len(x),2):
@@ -59,14 +84,14 @@ def get_path(sample):
     return path
 
 #god_mode2 uses noise dim of 300 otherwise 100
-model = torch.jit.load('C:/Users/Patrik/Desktop/Projekt/AimAssistUsingAi-main/AimAssistUsingAi-main/Mouse/models/gan_models/god_mode2.pt')
+model = torch.jit.load('C:/Users/User/Desktop/AimAssistUsingAi-main/Mouse/models/gan_models/lajos4.pt')
 model.eval()
 
 def Generate_gan_mouse_movement(new_x,new_y):
     with torch.no_grad():
-        generated_samples = model(torch.randn(1, 300).to(device=device))
+        generated_samples = model(torch.randn(1, 100).to(device=device))
         generated_samples = generated_samples.cpu().detach()
-        plot_path(get_path(generated_samples[0]),0,0)
+        #plot_path(get_path(generated_samples[0]),0,0)
         path = transform(get_path(generated_samples[0]),new_x,new_y)
         diff_x=new_x-sum(path[::2])
         diff_y=new_y-sum(path[1::2])
@@ -91,9 +116,14 @@ def produce_path_for_pure_results(sample):
     return path
 
 if __name__ == "__main__":
+    paths=[]
     with torch.no_grad():
-        generated_samples = model(torch.randn(20, 300).to(device=device))
+        generated_samples = model(torch.randn(100, 100).to(device=device))
         generated_samples = generated_samples.cpu().detach()
+        for i in range(0,len(generated_samples),10):
+            path = get_path(generated_samples[i])
+            paths.append(path)
+        multiple_path_to_plot(paths)
         for i in range(len(generated_samples)):    
             path=produce_path_for_pure_results(generated_samples[i])    
             plot_path(path,0,0)
