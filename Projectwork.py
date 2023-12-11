@@ -76,13 +76,13 @@ def mouse(rl,act_distance,body_multiplier,x,y,mouse_speed):
         if dest!=None and np.hypot(dest[0]-x/2,dest[1]-y/2) < act_distance:
             """ t1=create_thread(x/2,y/2,dest[0],dest[1],distance=2,t=0,G_0=20,W_0=5,M_0=12,D_0=15)
             t1.start() """
-            #wind_mouse(x/2,y/2,dest[0],dest[1],distance=3,t=int(5000),M_0=int(2*mouse_speed))
-            a,diff_x,diff_y = Generate_gan_mouse_movement(dest[0]-x/2,dest[1]-y/2)
-            i=0
-            while dist:=np.hypot(dest[0]-x/2,dest[1]-y/2) >= 3 and i < 20:
-                win32api.mouse_event(0x0001,int(a[i]),int(a[i+1]))
-                i+=2
-            win32api.mouse_event(0x0001,int(diff_x)//2,int(diff_y)//2)
+            wind_mouse(x/2,y/2,dest[0],dest[1],distance=3,t=int(8000),M_0=int(2*mouse_speed))
+            # a,diff_x,diff_y = Generate_gan_mouse_movement(dest[0]-x/2,dest[1]-y/2)
+            # i=0
+            # while dist:=np.hypot(dest[0]-x/2,dest[1]-y/2) >= 3 and i < 20:
+            #     win32api.mouse_event(0x0001,int(a[i]),int(a[i+1]))
+            #     i+=2
+            # win32api.mouse_event(0x0001,int(diff_x)//2,int(diff_y)//2)
 
                 
 """ def create_thread(start_x, start_y, dest_x, dest_y,distance,t,G_0=20, W_0=5, M_0=12, D_0=15):
@@ -128,7 +128,7 @@ def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
     camera.start()
     time.sleep(0.5) # wait for camera relase one img
     while True:
-        last_time=perf_counter()
+        #last_time=perf_counter()
         #img=np.array(camera.grab(region=region)) #dxcamban dxcam duplicator.py és 0-at 100ra
         result=model(img,size=x)
         rl=result.xyxy[0].tolist()
