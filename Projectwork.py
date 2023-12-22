@@ -79,7 +79,7 @@ def mouse(rl,act_distance,body_multiplier,x,y,mouse_speed):
             wind_mouse(x/2,y/2,dest[0],dest[1],distance=3,t=int(8000),M_0=int(2*mouse_speed))
             # a,diff_x,diff_y = Generate_gan_mouse_movement(dest[0]-x/2,dest[1]-y/2)
             # i=0
-            # while dist:=np.hypot(dest[0]-x/2,dest[1]-y/2) >= 3 and i < 20:
+            # while dist:=np.hypot(dest[0]-x/2,dest[1]-y/2) >= 2 and i < 40:
             #     win32api.mouse_event(0x0001,int(a[i]),int(a[i+1]))
             #     i+=2
             # win32api.mouse_event(0x0001,int(diff_x)//2,int(diff_y)//2)
