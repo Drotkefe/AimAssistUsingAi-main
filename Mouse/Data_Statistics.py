@@ -104,11 +104,11 @@ def main():
     #print("Átlagos lépésszám hossz:",avg_lenght_of_one_path())
     print("Legnagyobb lépés:",max_step_size())
     print("Átlagos pixel mérték lépésenként:",avg_step_size())
-    label_distribution()
+    #label_distribution()
     #plot_path(data[get_index(-1322,-561)])
 
-    for i in range(len(data)-1,len(data)-10,-1):
-        plot_path(data[i])
+    for i in range(len(data)-359,len(data)-981,-1):
+        plot_path(data[np.random.randint(514,3500)])
     
 
 if __name__ == '__main__':
