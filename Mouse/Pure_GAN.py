@@ -36,7 +36,7 @@ class Discriminator(nn.Module):
 
 discriminator = Discriminator().to(device=device)
 summary(discriminator,input_size=(999,2),batch_size=512)
-z_size=500
+z_size=100
 class Generator(nn.Module):
     def __init__(self):
         super().__init__()
@@ -63,6 +63,7 @@ def plot_metrics(discriminator_loss,generator_loss):
     x=[i for i in range(1,len(dmetrics_loss)+1)]
     plt.plot(x,discriminator_loss,'r')
     plt.plot(x,generator_loss,'b')
+    plt.get_figlabels()
     plt.xlabel('Training iteration')
     plt.ylabel('Loss')
     plt.show()
@@ -106,7 +107,7 @@ generator = Generator().to(device=device)
 #summary(generator,(1024,z_size),batch_size=512)
 
 lr = 0.0001
-num_epochs = 50
+num_epochs = 10
 loss_function = nn.BCELoss()
 batch_size = 512
 
@@ -179,7 +180,7 @@ for epoch in range(num_epochs):
 
 
 
-#plot_metrics(dmetrics_loss,gmetrics_loss)
+plot_metrics(dmetrics_loss,gmetrics_loss)
 
 latent_space_samples = torch.randn(batch_size, z_size).to(device=device)
 generated_samples = generator(latent_space_samples)
