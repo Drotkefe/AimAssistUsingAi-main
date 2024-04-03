@@ -84,7 +84,7 @@ def get_path(sample):
     return path
 
 #god_mode2 uses noise dim of 300 otherwise 100
-model = torch.jit.load('C:/Users/User/Desktop/AimAssistUsingAi-main/Mouse/models/gan_models/lajos4.pt')
+model = torch.jit.load('C:/Users/Patrik/Desktop/Projekt/AimAssistUsingAi-main/AimAssistUsingAi-main/Mouse/models/gan_models/lalika0.pt')
 model.eval()
 
 def Generate_gan_mouse_movement(new_x,new_y):
@@ -118,7 +118,7 @@ def produce_path_for_pure_results(sample):
 if __name__ == "__main__":
     paths=[]
     with torch.no_grad():
-        generated_samples = model(torch.randn(100, 300).to(device=device))
+        generated_samples = model(torch.randn(100, 100).to(device=device))
         generated_samples = generated_samples.cpu().detach()
         for i in range(0,len(generated_samples),10):
             path = get_path(generated_samples[i])

@@ -130,65 +130,46 @@ def plot_path(path):
 
 def generator_train_step(batch_size, discriminator, generator, g_optimizer, criterion):
     
-    # Init gradient
     g_optimizer.zero_grad()
     
-    # Building z
     z = Variable(torch.randn(batch_size, z_size)).to(device)
     
-    # Building fake labels
     fake_labels = Variable(torch.LongTensor(np.random.randint(0, class_numbers, batch_size))).to(device)
     
-    # Generating fake data
     fake_data = generator(z, fake_labels)
-    
-    # Disciminating fake data
+  
     validity = discriminator(fake_data, fake_labels)
     
-    # Calculating discrimination loss (fake data)
     g_loss = criterion(validity, Variable(torch.ones(batch_size)).to(device))
     
-    # Backword propagation
     g_loss.backward()
     
-    #  Optimizing generator
     g_optimizer.step()
     
     return g_loss.data
 
 def discriminator_train_step(batch_size, discriminator, generator, d_optimizer, criterion, real_data, labels):
     
-    # Init gradient 
     d_optimizer.zero_grad()
 
-    # Disciminating real data
     real_validity = discriminator(real_data, labels)
     
-    # Calculating discrimination loss (real data)
     real_loss = criterion(real_validity, Variable(torch.ones(batch_size)).to(device))
     
-    # Building z
     z = Variable(torch.randn(batch_size, z_size)).to(device)
     
-    # Building fake labels
     fake_labels = Variable(torch.LongTensor(np.random.randint(0, class_numbers, batch_size))).to(device)
     
-    # Generating fake data
     fake_data = generator(z, fake_labels)
     
-    # Disciminating fake data
     fake_validity = discriminator(fake_data, fake_labels)
     
-    # Calculating discrimination loss (fake data)
     fake_loss = criterion(fake_validity, Variable(torch.zeros(batch_size)).to(device))
     
-    # Sum two losses
     d_loss = real_loss + fake_loss
     
-    # Backword propagation
     d_loss.backward()
     
-    # Optimizing discriminator
     d_optimizer.step()
     
     return d_loss.data
@@ -207,7 +188,6 @@ for epoch in range(epochs):
     print('g_loss: {}, d_loss: {}'.format(g_loss, d_loss))
     z = Variable(torch.randn(class_numbers, z_size)).to(device)
     labels = Variable(torch.LongTensor(np.arange(class_numbers))).to(device)
-    # Generating data
     sample_data = generator(z, labels).unsqueeze(1).data.cpu()
     if (epoch+1)%10==0:
         # path=get_path(sample_data[1])
@@ -216,7 +196,7 @@ for epoch in range(epochs):
 
 z = Variable(torch.randn(class_numbers, z_size)).to(device)
 labels = Variable(torch.LongTensor(np.arange(class_numbers))).to(device)
-# Generating data
+
 sample_data = generator(z, labels).unsqueeze(1).data.cpu()
 for i in range(0,3):
     path=get_path(sample_data[i])
