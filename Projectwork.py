@@ -10,7 +10,7 @@ import psutil, os
 import time
 import sys
 sys.path.insert(8,'C:/Users/User/Desktop/AimAssistUsingAi-main/Mouse')
-from normalize import Generate_gan_mouse_movement
+#from normalize import Generate_gan_mouse_movement
 
 
 
@@ -21,14 +21,13 @@ def Closest_enemy(list,body_multiplier,x,y):
             width=i[2]-i[0]
             height=i[3]-i[1]
             center=(int(i[2]-width/2),int((i[3]-height*body_multiplier)))
-            distance.append((math.sqrt((center[0]-x/2)**2+(center[1]-y/2)**2),width+height,center))
+            distance.append((math.sqrt((center[0]-x/2)**2+(center[1]-y/2)**2),center))
     if len(distance)==0:
         return
-    return sorted(distance,key=lambda x: (-x[1],x[0]))[0][2]
+    return sorted(distance,key=lambda x: (x[0]))[0][1]
 
 sqrt3 = np.sqrt(3)
 sqrt5 = np.sqrt(5)
-run=False
 def wind_mouse(start_x, start_y, dest_x, dest_y,distance,t, G_0=20, W_0=5, M_0=3, D_0=15):
     '''
     WindMouse algorithm. Calls the move_mouse with each new step.
@@ -41,7 +40,7 @@ def wind_mouse(start_x, start_y, dest_x, dest_y,distance,t, G_0=20, W_0=5, M_0=3
     current_x,current_y = start_x,start_y
     v_x = v_y = W_x = W_y = 0
     step=0
-    while (dist:=np.hypot(dest_x-start_x,dest_y-start_y)) >= distance and step < 5:
+    while (dist:=np.hypot(dest_x-start_x,dest_y-start_y)) >= distance and step < 3:
         W_mag = min(W_0, dist)
         if dist >= D_0:
             W_x = W_x/sqrt3 + (2*np.random.random()-1)*W_mag/sqrt5
@@ -74,20 +73,13 @@ def mouse(rl,act_distance,body_multiplier,x,y,mouse_speed):
     if len(rl)>0:
         dest=Closest_enemy(rl,body_multiplier,x,y)
         if dest!=None and np.hypot(dest[0]-x/2,dest[1]-y/2) < act_distance:
-            """ t1=create_thread(x/2,y/2,dest[0],dest[1],distance=2,t=0,G_0=20,W_0=5,M_0=12,D_0=15)
-            t1.start() """
-            wind_mouse(x/2,y/2,dest[0],dest[1],distance=3,t=int(8000),M_0=int(2*mouse_speed))
+            wind_mouse(x/2,y/2,dest[0],dest[1],distance=3,t=int(0),M_0=int(2*mouse_speed))
             # a,diff_x,diff_y = Generate_gan_mouse_movement(dest[0]-x/2,dest[1]-y/2)
             # i=0
             # while dist:=np.hypot(dest[0]-x/2,dest[1]-y/2) >= 2 and i < 40:
             #     win32api.mouse_event(0x0001,int(a[i]),int(a[i+1]))
             #     i+=2
             # win32api.mouse_event(0x0001,int(diff_x)//2,int(diff_y)//2)
-
-                
-""" def create_thread(start_x, start_y, dest_x, dest_y,distance,t,G_0=20, W_0=5, M_0=12, D_0=15):
-    return Thread(target=wind_mouse,args=(start_x,start_y,dest_x,dest_y,distance,t,G_0, W_0, M_0, D_0)) """
-
 
 def Camera_Thread(x,y):
     x_plus=int((1920-x)/2)
@@ -99,18 +91,6 @@ def Camera_Thread(x,y):
     img=np.array(sct.grab(monitor))
     while True:
         img=np.array(sct.grab(monitor))
-
-""" def Mouse_Thread(body_multiplier,x,y,act_distance,mouse_speed):
-    global rl
-    while True:
-        if len(rl)>0:
-            dest=Closest_enemy(rl,body_multiplier,x,y)
-            if dest!=None and np.hypot(dest[0]-x/2,dest[1]-y/2) < act_distance:
-                t1=create_thread(x/2,y/2,dest[0],dest[1],distance=2,t=0,G_0=20,W_0=5,M_0=12,D_0=15)
-                t1.start()
-                wind_mouse(x/2,y/2,dest[0],dest[1],distance=5,t=0,M_0=int(1*mouse_speed)) """
-
-
 
 def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
     if (torch.cuda.is_available()):
@@ -128,20 +108,19 @@ def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
     camera.start()
     time.sleep(0.5) # wait for camera relase one img
     while True:
-        #last_time=perf_counter()
+        last_time=perf_counter()
         #img=np.array(camera.grab(region=region)) #dxcamban dxcam duplicator.py és 0-at 100ra
         result=model(img,size=x)
         rl=result.xyxy[0].tolist()
         #print("fps:",1/(perf_counter() - last_time),end='\r')
         #t1=Thread(target=mouse,args=(rl,act_distance,body_multiplier,x,y,mouse_speed))
         #last_time=perf_counter()
-        if(run!=True):
-            mouse(rl,act_distance,body_multiplier,x,y,mouse_speed)
+        mouse(rl,act_distance,body_multiplier,x,y,mouse_speed)
         #cv2.imshow('debug',np.squeeze(result.render())) 
         cv2.waitKey(0)
-        #print("fps:",1/(perf_counter() - last_time),end='\r')
+        print("fps:",1/(perf_counter() - last_time),end='\r')
 
 
 if __name__ == "__main__":
 
-    Aimbot("Counter Strike: Global Offensive",1850,5,320,320,0.82)
+    Aimbot("Counter Strike: Global Offensive",1850,3,320,320,0.82)
