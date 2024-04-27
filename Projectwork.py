@@ -1,27 +1,28 @@
 from time import perf_counter
 import math
 import win32api
+import win32con
 import cv2
 import mss
 import numpy as np
 import torch
 from threading import Thread
+from multiprocessing import Process, Queue
 import psutil, os
 import time
 import sys
-sys.path.insert(8,'C:/Users/User/Desktop/AimAssistUsingAi-main/Mouse')
-#from normalize import Generate_gan_mouse_movement
+sys.path.insert(8,'C:/Users/Patrik/Desktop/Projekt/AimAssistUsingAi-main/AimAssistUsingAi-main/Mouse')
+from normalize import Generate_gan_mouse_movement
 
 
 
 def Closest_enemy(list,body_multiplier,x,y):
     distance=[]
     for i in list:
-        if i[5]==0 and i[4]>0.77:
-            width=i[2]-i[0]
-            height=i[3]-i[1]
-            center=(int(i[2]-width/2),int((i[3]-height*body_multiplier)))
-            distance.append((math.sqrt((center[0]-x/2)**2+(center[1]-y/2)**2),center))
+        width=i[2]-i[0]
+        height=i[3]-i[1]
+        center=(int(i[2]-width/2),int((i[3]-height*body_multiplier)))
+        distance.append((math.sqrt((center[0]-x/2)**2+(center[1]-y/2)**2),center))
     if len(distance)==0:
         return
     return sorted(distance,key=lambda x: (x[0]))[0][1]
@@ -40,7 +41,7 @@ def wind_mouse(start_x, start_y, dest_x, dest_y,distance,t, G_0=20, W_0=5, M_0=3
     current_x,current_y = start_x,start_y
     v_x = v_y = W_x = W_y = 0
     step=0
-    while (dist:=np.hypot(dest_x-start_x,dest_y-start_y)) >= distance and step < 3:
+    while (dist:=np.hypot(dest_x-start_x,dest_y-start_y)) >= distance and step<20:
         W_mag = min(W_0, dist)
         if dist >= D_0:
             W_x = W_x/sqrt3 + (2*np.random.random()-1)*W_mag/sqrt5
@@ -64,22 +65,26 @@ def wind_mouse(start_x, start_y, dest_x, dest_y,distance,t, G_0=20, W_0=5, M_0=3
         move_x = int(np.round(start_x))
         move_y = int(np.round(start_y))
         if current_x != move_x or current_y != move_y:
-            for i in range(t):
-                pass
             win32api.mouse_event(0x0001,int(v_x),int(v_y))
             step+=1
+    if (dist:=np.hypot(dest_x-start_x,dest_y-start_y)) <= distance-1.3:
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,0,0)
+        time.sleep(0.2)
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,0,0)
 
 def mouse(rl,act_distance,body_multiplier,x,y,mouse_speed):
     if len(rl)>0:
         dest=Closest_enemy(rl,body_multiplier,x,y)
         if dest!=None and np.hypot(dest[0]-x/2,dest[1]-y/2) < act_distance:
             wind_mouse(x/2,y/2,dest[0],dest[1],distance=3,t=int(0),M_0=int(2*mouse_speed))
-            # a,diff_x,diff_y = Generate_gan_mouse_movement(dest[0]-x/2,dest[1]-y/2)
+            #path,diff_x,diff_y = Generate_gan_mouse_movement(dest[0]-x/2,dest[1]-y/2)
             # i=0
             # while dist:=np.hypot(dest[0]-x/2,dest[1]-y/2) >= 2 and i < 40:
             #     win32api.mouse_event(0x0001,int(a[i]),int(a[i+1]))
             #     i+=2
             # win32api.mouse_event(0x0001,int(diff_x)//2,int(diff_y)//2)
+    else:
+        win32api.mouse_event(0x0001,20,0)
 
 def Camera_Thread(x,y):
     x_plus=int((1920-x)/2)
@@ -92,7 +97,18 @@ def Camera_Thread(x,y):
     while True:
         img=np.array(sct.grab(monitor))
 
-def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
+
+def Camera_process(x,y,img):
+    x_plus=int((1920-x)/2)
+    y_plus=int((1080-y)/2)
+
+    monitor = {"top": y_plus, "left": x_plus, "width": x, "height": y}
+    sct = mss.mss()
+
+    while True:
+        img.put(np.array(sct.grab(monitor)))
+
+def Recognition_process(game,act_distance,mouse_speed,x,y,body_multiplier,img):
     if (torch.cuda.is_available()):
         print(torch.cuda.get_device_name(0))
     if(game=="Counter Strike: Global Offensive"):
@@ -100,27 +116,57 @@ def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
     else:
         game="Valorant.pt"
     
+    model=torch.hub.load('C:/Users/Patrik/yolov5','custom',path=game,source='local')
+    model.conf = 0.77
+    model.maxdet = 3
+    model.classes = [0]
+
+    while True:
+        last_time=perf_counter()
+        if img.full():
+            result=model(img.get(),size=x)
+            rl=result.xyxy[0].tolist()
+            mouse(rl,act_distance,body_multiplier,x,y,mouse_speed)
+            #cv2.imshow('debug',np.squeeze(result.render())) 
+            cv2.waitKey(0)
+            print("fps:",1/(perf_counter() - last_time))
+
+def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
+    if (torch.cuda.is_available()):
+        print(torch.cuda.get_device_name(0))
+    if(game=="Counter Strike: Global Offensive"):
+        game="best.engine"
+        #game="CS_GO_Modell.pt"
+    else:
+        game="Valorant.pt"
+    
     p = psutil.Process(os.getpid())
     p.nice(psutil.HIGH_PRIORITY_CLASS)
 
     model=torch.hub.load('ultralytics/yolov5','custom',path=game)
+    model.conf = 0.77
+    model.maxdet = 3
+    model.classes = [0]
+    
     camera=Thread(target=Camera_Thread,args=(x,y))
     camera.start()
+
     time.sleep(0.5) # wait for camera relase one img
-    while True:
-        last_time=perf_counter()
-        #img=np.array(camera.grab(region=region)) #dxcamban dxcam duplicator.py és 0-at 100ra
+    for i in range(5000):
+        #last_time=perf_counter()
         result=model(img,size=x)
         rl=result.xyxy[0].tolist()
-        #print("fps:",1/(perf_counter() - last_time),end='\r')
-        #t1=Thread(target=mouse,args=(rl,act_distance,body_multiplier,x,y,mouse_speed))
-        #last_time=perf_counter()
         mouse(rl,act_distance,body_multiplier,x,y,mouse_speed)
         #cv2.imshow('debug',np.squeeze(result.render())) 
         cv2.waitKey(0)
-        print("fps:",1/(perf_counter() - last_time),end='\r')
+        #print("fps:",1/(perf_counter() - last_time))
 
 
 if __name__ == "__main__":
-
-    Aimbot("Counter Strike: Global Offensive",1850,3,320,320,0.82)
+    Aimbot("Counter Strike: Global Offensive",250,1.5,320,320,0.84)
+    # image_que=Queue(maxsize=1)
+    # cam=Process(target=Camera_process, args=(320,320,image_que))
+    # cam.start()
+    # img_proc=Process(target=Recognition_process, args=("Counter Strike: Global Offensive",250,3,320,320,0.82,image_que))
+    # img_proc.start()
+    # img_proc.join()
