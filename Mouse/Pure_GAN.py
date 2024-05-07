@@ -36,7 +36,7 @@ class Discriminator(nn.Module):
 
 discriminator = Discriminator().to(device=device)
 summary(discriminator,input_size=(999,2),batch_size=512)
-z_size=100
+z_size=600
 class Generator(nn.Module):
     def __init__(self):
         super().__init__()
@@ -107,11 +107,11 @@ generator = Generator().to(device=device)
 #summary(generator,(1024,z_size),batch_size=512)
 
 lr = 0.0001
-num_epochs = 10
+num_epochs = 250
 loss_function = nn.BCELoss()
-batch_size = 512
+batch_size = 1024
 
-optimizer_discriminator = torch.optim.Adam(discriminator.parameters(), lr=lr)
+optimizer_discriminator = torch.optim.Adam(discriminator.parameters(), lr=lr*10)
 optimizer_generator = torch.optim.Adam(generator.parameters(), lr=lr/10)
 
 
@@ -186,7 +186,7 @@ latent_space_samples = torch.randn(batch_size, z_size).to(device=device)
 generated_samples = generator(latent_space_samples)
 #torch.save(generator,"models\gan_models\model.pth")
 model_scripted = torch.jit.script(generator)
-model_scripted.save('models\gan_models\proba2.pt') 
+model_scripted.save('models\gan_models\z_size600_1.pt') 
 
 
 generated_samples = generated_samples.cpu().detach()
