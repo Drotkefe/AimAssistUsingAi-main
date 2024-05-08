@@ -77,13 +77,13 @@ def mouse(rl,act_distance,body_multiplier,x,y,mouse_speed):
     if len(rl)>0:
         dest=Closest_enemy(rl,body_multiplier,x,y)
         if dest!=None and np.hypot(dest[0]-x/2,dest[1]-y/2) < act_distance:
-            wind_mouse(x/2,y/2,dest[0],dest[1],distance=3,t=int(0),M_0=int(2*mouse_speed))
-            #path,diff_x,diff_y = Generate_gan_mouse_movement(dest[0]-x/2,dest[1]-y/2)
-            # i=0
-            # while dist:=np.hypot(dest[0]-x/2,dest[1]-y/2) >= 2 and i < 40:
-            #     win32api.mouse_event(0x0001,int(a[i]),int(a[i+1]))
-            #     i+=2
-            # win32api.mouse_event(0x0001,int(diff_x)//2,int(diff_y)//2)
+            #wind_mouse(x/2,y/2,dest[0],dest[1],distance=3,t=int(0),M_0=int(2*mouse_speed))
+            path,diff_x,diff_y = Generate_gan_mouse_movement(dest[0]-x/2,dest[1]-y/2)
+            i=0
+            while dist:=np.hypot(dest[0]-x/2,dest[1]-y/2) >= 2 and i < 40:
+                win32api.mouse_event(0x0001,int(path[i]),int(path[i+1]))
+                i+=2
+            win32api.mouse_event(0x0001,int(diff_x)//2,int(diff_y)//2)
 
 def Camera_Thread(x,y):
     x_plus=int((1920-x)/2)
@@ -147,27 +147,25 @@ def Aimbot(game,act_distance,mouse_speed,x,y,body_multiplier):
     model.maxdet = 3
     model.classes = [0]
     
-    # camera=Thread(target=Camera_Thread,args=(x,y))
-    # camera.start()
-    camera = dxcam.create(output_idx=0, output_color="BGRA")
-    print(dxcam.device_info())
+    camera=Thread(target=Camera_Thread,args=(x,y))
+    camera.start()
+    # camera = dxcam.create(output_idx=0, output_color="BGRA")
+    # print(dxcam.device_info())
 
     time.sleep(0.5) # wait for camera relase one img
     while True:
         last_time=perf_counter()
-        screenshot = camera.grab((int((1920-x)/2),int((1080-y)/2),int((1920-x)/2)+x,int((1080-y)/2)+y))
-        if screenshot is None: continue
-        result=model(screenshot,size=x)
+        # screenshot = camera.grab((int((1920-x)/2),int((1080-y)/2),int((1920-x)/2)+x,int((1080-y)/2)+y))
+        # if screenshot is None: continue
+        result=model(img,size=x)
         rl=result.xyxy[0].tolist()
-        #rl=result.pandas().xyxy[0]
         mouse(rl,act_distance,body_multiplier,x,y,mouse_speed)
         #cv2.imshow('debug',np.squeeze(result.render())) 
         cv2.waitKey(0)
-        #print("fps:",1/(perf_counter() - last_time))
         print("fps:",1/(perf_counter() - last_time))
 
 if __name__ == "__main__":
-    Aimbot("Counter Strike: Global Offensive",100,2,320,320,0.84)
+    Aimbot("Counter Strike: Global Offensive",320,2,320,320,0.84)
     # image_que=Queue(maxsize=1)
     # cam=Process(target=Camera_process, args=(320,320,image_que))
     # cam.start()
