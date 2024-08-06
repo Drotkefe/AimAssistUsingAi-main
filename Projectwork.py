@@ -11,8 +11,6 @@ from multiprocessing import Process, Queue
 import psutil, os
 import time
 import dxcam
-import sys
-sys.path.insert(8,'C:/Users/Patrik/Desktop/Projekt/AimAssistUsingAi-main/AimAssistUsingAi-main/Mouse')
 from normalize import Generate_gan_mouse_movement
 
 
